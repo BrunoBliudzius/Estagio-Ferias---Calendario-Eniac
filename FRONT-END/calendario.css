@@ -1,0 +1,12 @@
+.divCabecalho {
+    background-color: #2432B3;
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center;     /* Centraliza verticalmente */
+    height: 100px; /* ajuste se necessário */
+}
+
+#eniac {
+    padding: 15px;
+    max-height: 90px;
+}
