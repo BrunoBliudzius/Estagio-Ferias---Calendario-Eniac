@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   sodipodi:docname="logo_eniac_svg.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.92599442"
+     inkscape:cx="269.98003"
+     inkscape:cy="292.11839"
+     inkscape:window-width="1920"
+     inkscape:window-height="974"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Camada 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g2"
+       style="fill:#000000">
+      <g
+         id="g1"
+         transform="translate(-19.143834,-18.286647)"
+         style="fill:#000000">
+        <path
+           style="fill:#000000;stroke-width:0.195022"
+           d="M 96.005655,97.297475 80.9625,122.73471 l 29.80408,0.55411 z"
+           id="path1-8-1"
+           sodipodi:nodetypes="cccc" />
+        <path
+           style="fill:#000000;stroke-width:0.195022"
+           d="m 90.299445,97.219165 -15.043155,25.437245 29.80408,0.55411 z"
+           id="path1-8"
+           sodipodi:nodetypes="cccc" />
+        <path
+           style="fill:#000000;stroke-width:0.195022"
+           d="m 85.806422,97.126526 -15.043155,25.437234 29.804073,0.55411 z"
+           id="path1"
+           sodipodi:nodetypes="cccc" />
+      </g>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24.4996px;font-family:Arial;-inkscape-font-specification:Arial;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:2.04164"
+         x="97.901886"
+         y="98.0205"
+         id="text1"
+         transform="scale(0.93785948,1.0662578)"><tspan
+           sodipodi:role="line"
+           id="tspan1"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:2.04164;fill:#000000"
+           x="97.901886"
+           y="98.0205">Eniac</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:2.04164;fill:#000000"
+           x="97.901886"
+           y="128.64507"
+           id="tspan2" /></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.56549px;font-family:Arial;-inkscape-font-specification:Arial;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:1.88059"
+         x="61.679817"
+         y="97.706856"
+         id="text1-2"
+         transform="scale(0.86387851,1.1575702)"><tspan
+           sodipodi:role="line"
+           id="tspan1-7"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.56549px;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;stroke-width:1.88059"
+           x="61.679817"
+           y="97.706856">Centro Universitário de Excelência</tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.56549px;font-family:Arial;-inkscape-font-specification:Arial;fill:#000000;stroke-width:1.88059"
+           x="61.679817"
+           y="107.16372"
+           id="tspan2-6" /></text>
+    </g>
+  </g>
+</svg>

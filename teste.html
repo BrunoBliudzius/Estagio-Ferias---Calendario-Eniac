@@ -8,34 +8,43 @@
     <script>
 
         document.addEventListener('DOMContentLoaded', function () {
+            var botao = document.getElementById("botao")
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 themeSystem: 'bootstrap5',
-                height: 550,
-                headerToolbar: { center: 'dayGridMonth,timeGridWeek' }, // buttons for switching between views
+                height: 400,
+                headerToolbar: { center: 'dayGridMonth,timeGridWeek' },
 
                 views: {
                     dayGridMonth: { // name of view
-                        titleFormat: { year: 'numeric', month: '2-digit', day: '2-digit' }
+                        titleFormat: { day: '2-digit', month: '2-digit', year: 'numeric' }
                         // other view-specific options here
                     }
                 },
 
+                timeZone: 'UTC−03:00',
+
+                events: [
+                    { // this object will be "parsed" into an Event Object
+                        title: 'Aula de bale', // a property!
+                        start: '2025-07-07',
+                         // a property!
+                        // a property! ** see important note below about 'end' **
+                    },
+                    { // this object will be "parsed" into an Event Object
+                        title: 'Aula de bale', // a property!
+                        start: '2025-07-10',
+                        allDay: false // a property!
+                        // a property! ** see important note below about 'end' **
+                    }
+                ],
+
                 initialView: 'dayGridMonth',
-                dateClick: function () {
-                    alert('voce clicou em uma data!!');
-                }
             });
 
             calendar.render();
-            calendar.on('dateClick', function (info) {
-                console.log('clicou na ' + info.dateStr);
-            });
             calendar.getOption('locale');
             calendar.setOption('locale', 'pt-br');
-
-
-
         });
 
     </script>
