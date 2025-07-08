@@ -10,3 +10,13 @@
     padding: 15px;
     max-height: 90px;
 }
+
+
+#evento {
+    padding: 5px 15px;
+    background-color: #ffe466;
+    border-radius: 20px;
+    border: 2px solid #054161;
+    font-weight: bold;
+    color: #054161;
+}
