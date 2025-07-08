@@ -16,10 +16,15 @@ datas = [
         "title": "Aula de judo",
         "start": "2025-07-10",
         
+    },
+    {
+        "id": 3,
+        "title": "Aula de dança",
+        "start": "2025-07-08",
     }
 ]
 
-@app.route('/datas')
+@app.route('/datas', methods=['GET'])
 def obter_eventos():
     return jsonify(datas)
 app.run(port=5000, host='localhost', debug=True)
