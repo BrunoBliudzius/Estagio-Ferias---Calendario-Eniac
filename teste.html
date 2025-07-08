@@ -38,8 +38,8 @@
                     // Use for...of para iterar sobre objetos
                     for (let NovoEvento of resposta) {
                         calendar.addEvent({
-                            title: NovoEvento.title,
-                            start: NovoEvento.start,
+                            title: NovoEvento.descricao,
+                            start: NovoEvento.dataCalendario,
                         });
                     }
                 }
