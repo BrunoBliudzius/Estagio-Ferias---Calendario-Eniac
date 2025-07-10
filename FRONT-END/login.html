@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="pt-br">
   <head>
     <meta charset="utf-8" />
@@ -12,56 +13,85 @@
     />
     <link rel="stylesheet" href="login.css" />
 
-    <script></script>
+   <script>
+  function verificarLogin(event) {
+    event.preventDefault(); // Impede o recarregamento da página
+
+    var usuario = document.getElementById("nome").value;
+    var senha = document.getElementById("senha").value;
+    var mensagem = document.getElementById("mensagem");
+
+    // Limpa qualquer mensagem anterior
+    mensagem.textContent = "";
+
+    // Verificacao do login + senha
+    if (usuario === "admin" && senha === "123admin") {
+      mensagem.style.color = "green";
+      mensagem.textContent = "Login feito com sucesso...";
+
+      // Redireciona após 3.5 segundos
+      setTimeout(() => {
+        window.location.href = "http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/calendarioUser.html";
+      }, 1800);
+    } else {
+      mensagem.style.color = "red";
+      mensagem.textContent = "Login não confirmado";
+    }
+  }
+</script>
+
   </head>
 
   <body>
     <div class="divCabecalho">
       <a href="https://www.eniac.edu.br/">
         <img
-          src="http://localhost/Estagio-Ferias---Calendario-Eniac/imagens/path32.png "
-          alt=""
+          src="http://localhost/Estagio-Ferias---Calendario-Eniac/imagens/path32.png"
+          alt="Logo Eniac"
           id="eniac"
-      /></a>
+        />
+      </a>
     </div>
-    <body>
-      <div class="box">
-        <form action="">
-          <fieldset>
-            <br>
-             <legend><b> Login Administrador</b></legend>
-             <br>
-           
-            <br />
 
-            <div class="inputBox">
-              <input
-                type="text"
-                name="nome"
-                id="nome"
-                class="inputUser"
-                required
-              />
-              <label for="nome" class="labelInput">Nome de usuário</label>
-            </div>
+    <div class="box">
+      <form onsubmit="verificarLogin(event)">
+        <fieldset>
+          <br />
+          <legend><b>Login Administrador</b></legend>
+          <br><br>
 
-            <br /><br />
+          <div class="inputBox">
+            <input
+              type="text"
+              name="nome"
+              id="nome"
+              class="inputUser"
+              required
+            />
+            <label for="nome" class="labelInput">Nome de usuário</label>
+          </div>
 
-            <div class="inputBox">
-              <input
-                type="password"
-                name="senha"
-                id="senha"
-                class="inputUser"
-                required
-              />
-              <label for="senha" class="labelInput">Senha</label> <br><br><br>
+          <br /><br />
 
-              <button type="submit" id = 'submit'>Login</button><br><br>
-             
-          </fieldset>
-        </form>
-      </div>
-    </body>
+          <div class="inputBox">
+            <input
+              type="password"
+              name="senha"
+              id="senha"
+              class="inputUser"
+              required
+            />
+            <label for="senha" class="labelInput">Senha</label>
+          </div>
+
+          <br /><br /><br />
+
+          <button type="submit" id="submit">Login</button>
+          <br /><br />
+
+          <div id="mensagem"></div>
+        </fieldset>
+      </form>
+    </div>
   </body>
 </html>
