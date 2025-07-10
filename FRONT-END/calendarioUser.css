@@ -1,9 +1,16 @@
 .divCabecalho {
     background-color: #054161;
     display: flex;
-    justify-content: center; /* Centraliza horizontalmente */
-    align-items: center;     /* Centraliza verticalmente */
-    height: 100px; /* ajuste se necessário */
+    justify-content: center; /* Mantém o logo centralizado */
+    align-items: center;     /* Mantém o logo centralizado */
+    height: 100px;
+    position: relative; /* Essencial para o posicionamento absoluto do filho */
+}
+
+.esquerda {
+    position: absolute; /* Posição absoluta em relação ao pai (.divCabecalho) */
+    left: 15px;         /* Distância da borda esquerda */
+    bottom: 10px;       /* Distância da borda inferior */
 }
 
 #eniac {
@@ -11,12 +18,12 @@
     max-height: 90px;
 }
 
-
 #evento {
     padding: 5px 15px;
-    background-color: #ffe466;
+    background-color: #ffe466; 
     border-radius: 20px;
-    border: 2px solid #054161;
+    border: none; /* Removendo a borda para ficar mais parecido com a imagem */
     font-weight: bold;
     color: #054161;
+    cursor: pointer; 
 }
