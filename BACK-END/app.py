@@ -26,8 +26,10 @@ def obter_eventos():
     for row in rows:
         eventos.append({
             'id': row['id'],
-            'descricao': row['descricao'],
-            'dataCalendario': row['dataCalendario']
+            'nomeEvento': row['nomeEvento'],
+            'dataInicial': row['dataInicial'],
+            'dataFinal': row['dataFinal'],
+            'descricao': row['descricao']
         })
     return jsonify(eventos)
 
@@ -35,17 +37,19 @@ def obter_eventos():
 def add_evento():
     novo_evento = request.get_json()
 
+    nomeEvento = novo_evento.get('nomeEvento')
+    dataInicial = novo_evento.get('dataInicial')
+    dataFinal = novo_evento.get('dataFinal')
     descricao = novo_evento.get('descricao')
-    data_calendario = novo_evento.get('dataCalendario')
 
-    if not descricao or not data_calendario:
+    if not nomeEvento or not dataInicial or not dataFinal:
         return jsonify({'error': 'Faltam campos obrigatórios'}), 400
 
     conexao = get_db_connection()
     cursor = conexao.cursor()
     cursor.execute(
-        'INSERT INTO dados (descricao, dataCalendario) VALUES (%s, %s)',
-        (descricao, data_calendario)
+        'INSERT INTO dados (nomeEvento, dataInicial,dataFinal,descricao) VALUES (%s, %s, %s, %s)',
+        (nomeEvento,dataInicial,dataFinal, descricao)
     )
     conexao.commit()
     conexao.close()
