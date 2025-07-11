@@ -25,8 +25,10 @@
                 <div id="Container"></div>
                 <label for="NomeEvento">Nome do Evento</label>
                 <input type="text" id="NomeEvento" name="NomeEvento" required />
-                <label for="DataEvento">Qual data Adcionar:</label>
+                <label for="DataEvento">Qual data inicial:</label>
                 <input type="date" id="DataEvento" name="DataEvento" required />
+                <label for="DataEvento">Qual data Final:</label>
+                <input type="date" id="DataEvento2" name="DataEvento2" required />
                 <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" />
                 <button><a href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/calendarioUser.html">Ir para calendario</a></button>
             </fieldset>
@@ -40,6 +42,7 @@
         frm.addEventListener("submit", (e) => {
             let NomeEvento = document.getElementById("NomeEvento").value.trim()
             let DataEvento = document.getElementById("DataEvento").value.trim()
+            let DataEvento2 = document.getElementById("DataEvento2").value.trim()
             if (NomeEvento.length < 3) {
                 alert("O nome do evento deve ter pelo menos 3 caracteres.");
                 e.preventDefault();
@@ -51,8 +54,9 @@
                 obj.setRequestHeader("Content-Type", "application/json");
 
                 data = {
-                    descricao: NomeEvento,
-                    dataCalendario: DataEvento
+                    nomeEvento: NomeEvento,
+                    dataInicial: DataEvento,
+                    dataFinal: DataEvento2
                 };
                 console.log(data);
                 obj.onreadystatechange = function () {

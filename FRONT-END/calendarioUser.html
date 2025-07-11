@@ -12,55 +12,54 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       let url = "http://localhost:5000/datas";
+      var calendarEl = document.getElementById("calendar");
+
+      // Cria o calendário uma única vez
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        eventClick: function (info) {
+          const modalTitle = document.querySelector(".modal-title");
+          const modalBody = document.querySelector(".modal-body p");
+
+          modalTitle.textContent = info.event.title;
+          modalBody.textContent = `Data: ${info.event.start.toLocaleDateString()}`;
+
+          const bootstrapModal = new bootstrap.Modal(
+            document.querySelector(".modal")
+          );
+          bootstrapModal.show();
+        },
+        height: 450,
+        selectable: true,
+        views: {
+          dayGridMonth: {
+            titleFormat: {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            },
+          },
+        },
+        initialView: "dayGridMonth",
+        locale: "pt-br",
+      });
+
+      calendar.render();
       let obj = new XMLHttpRequest();
       obj.open("GET", url, true);
       obj.onreadystatechange = function () {
         if (obj.readyState == 4 && obj.status == 200) {
           var resposta = JSON.parse(obj.responseText);
           console.log(resposta);
-        }
-        var calendarEl = document.getElementById("calendar");
+          for (let NovoEvento of resposta) {
+            let dataFinal = new Date(NovoEvento.dataFinal);
+            dataFinal.setDate(dataFinal.getDate() + 1); // soma 1 dia
 
-        // Cria o calendário uma única vez
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-          eventClick: function (info) {
-            const modalTitle = document.querySelector(".modal-title");
-            const modalBody = document.querySelector(".modal-body p");
-
-            modalTitle.textContent = info.event.title;
-            modalBody.textContent = `Data: ${info.event.start.toLocaleDateString()}`;
-
-            const bootstrapModal = new bootstrap.Modal(
-              document.querySelector(".modal")
-            );
-            bootstrapModal.show();
-          },
-          height: 450,
-          selectable: true,
-          views: {
-            dayGridMonth: {
-              titleFormat: {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              },
-            },
-          },
-          initialView: "dayGridMonth",
-          locale: "pt-br",
-        });
-
-        calendar.render();
-
-        for (let NovoEvento of resposta) {
-          let dataFinal = new Date(NovoEvento.dataFinal);
-          dataFinal.setDate(dataFinal.getDate() + 1); // soma 1 dia
-
-          calendar.addEvent({
-            title: NovoEvento.nomeEvento,
-            start: NovoEvento.dataInicial,
-            end: dataFinal.toISOString().split("T")[0], // formata yyyy-mm-dd
-          });
+            calendar.addEvent({
+              title: NovoEvento.nomeEvento,
+              start: NovoEvento.dataInicial,
+              end: dataFinal.toISOString().split("T")[0], // formata yyyy-mm-dd
+            });
+          }
         }
       }
       obj.send();

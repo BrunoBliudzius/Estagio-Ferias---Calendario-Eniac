@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 08/07/2025 às 23:05
+-- Tempo de geração: 11/07/2025 às 23:09
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -29,18 +29,19 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `dados` (
   `id` int(11) NOT NULL,
-  `descricao` varchar(255) NOT NULL,
-  `dataCalendario` varchar(255) NOT NULL
+  `nomeEvento` varchar(255) DEFAULT NULL,
+  `dataInicial` varchar(255) DEFAULT NULL,
+  `dataFinal` varchar(255) NOT NULL,
+  `descricao` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Despejando dados para a tabela `dados`
 --
 
-INSERT INTO `dados` (`id`, `descricao`, `dataCalendario`) VALUES
-(1, 'Aula de futebol', '2025-07-10'),
-(2, 'Aula de futebol', '2025-07-11'),
-(3, 'Aula de bale', '2025-07-17');
+INSERT INTO `dados` (`id`, `nomeEvento`, `dataInicial`, `dataFinal`, `descricao`) VALUES
+(1, 'Aula de dança', '2025-07-08', '2025-07-11', NULL),
+(2, 'aula de gastronomia', '2025-07-08', '2025-07-11', NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -60,7 +61,7 @@ ALTER TABLE `dados`
 -- AUTO_INCREMENT de tabela `dados`
 --
 ALTER TABLE `dados`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
