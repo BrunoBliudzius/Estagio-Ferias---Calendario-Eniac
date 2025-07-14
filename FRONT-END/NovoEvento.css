@@ -57,7 +57,7 @@ input[type="date"] {
   margin-bottom: 10px;
 }
 
-#submit,
+#cadastrarEvento,
 #voltar {
   background-color: #ffe466;
   width: 100%;
@@ -71,13 +71,12 @@ input[type="date"] {
   font-weight: bold;
 }
 
-#submit:hover,
+#cadastrarEvento:hover,
 #voltar:hover {
   background-color: #ffd633;
   color: #00394f;
 }
 
-/* mantido por compatibilidade */
 .inputBox {
   position: relative;
   padding: 5px;
