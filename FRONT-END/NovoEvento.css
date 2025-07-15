@@ -20,16 +20,23 @@ body {
 
 /* Aumentado tamanho da box, com mais espaço e sombra */
 .box {
-  position: relative;
   margin: 50px auto;
   background-color: #054161;
-  padding: 40px 30px;
+  padding: 10px 10px;
   border-radius: 15px;
-  width: 50%;
   color: white;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 }
 
+.box2{
+  max-width: 800px;      /* controla a largura */
+  margin: 0 auto;        /* centraliza horizontalmente */
+  background-color: #004060; /* cor de fundo opcional */
+  padding: 30px;
+  border-radius: 10px;
+  color: white;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
 /* Campo com borda destacada */
 fieldset {
   border: 3px solid #ffe466;
@@ -108,4 +115,35 @@ input[type="date"] {
   top: -20px;
   font-size: 12px;
   color: white;
+}
+
+.container-flex {
+  display: flex;
+  align-items: flex-start; /* alinha no topo */
+  gap: 20px; /* espaço entre form e calendário */
+}
+
+#formulario {
+  flex: 1;
+  max-width: 500px;
+  height: 10vh;
+}
+
+#calendar {
+  flex: 1; /* o calendário ocupa o resto */
+  max-width: 600px; /* largura desejada */
+}
+
+#calendar {
+  flex: 1; /* o calendário ocupa o resto */
+  max-width: 600px; /* largura desejada */
+}
+
+@media (max-width: 768px) {
+  .container-flex {
+    flex-direction: column; /* empilha no mobile */
+  }
+  #calendar {
+    max-width: 100%;
+  }
 }

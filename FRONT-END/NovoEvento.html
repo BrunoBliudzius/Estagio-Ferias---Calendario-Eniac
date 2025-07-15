@@ -17,29 +17,114 @@
         </a>
     </div>
 
-    <div class="box">
-        <form>
-            <fieldset>
-                <br />
-                <legend><b>Cadastrar novo Evento</b></legend>
-                <div id="Container"></div>
-                <label for="NomeEvento">Nome do Evento</label>
-                <input type="text" id="NomeEvento" name="NomeEvento" required />
-                <label for="DataEvento">Qual data inicial:</label>
-                <input type="date" id="DataEvento" name="DataEvento" required />
-                <label for="DataEvento">Qual data Final:</label>
-                <input type="date" id="DataEvento2" name="DataEvento2" required />
-                <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" />
-                <button id="voltar"><a
-                        href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/calendarioUser.html">Ir para
-                        calendario</a></button>
-            </fieldset>
-        </form>
+    <div class="container-flex">
+        <div class="formulario ms-5">
+            <div class="box">
+                <form>
+                    <fieldset>
+                        <br />
+                        <legend><b>Cadastrar novo Evento</b></legend>
+                        <div id="Container"></div>
+                        <label for="NomeEvento">Nome do Evento</label>
+                        <input type="text" id="NomeEvento" name="NomeEvento" required />
+                        <label for="DataEvento">Qual data inicial:</label>
+                        <input type="date" id="DataEvento" name="DataEvento" required />
+                        <label for="DataEvento">Qual data Final:</label>
+                        <input type="date" id="DataEvento2" name="DataEvento2" required />
+                        <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" />
+                        <button id="voltar"><a
+                                href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/calendarioUser.html">Ir
+                                para
+                                calendario</a></button>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                let url = "http://localhost:5000/datas";
+                var calendarEl = document.getElementById("calendar");
+
+                // Cria o calendário uma única vez
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    eventClick: function (info) {
+                        const modalTitle = document.querySelector(".modal-title");
+                        const modalBody = document.querySelector(".modal-body p");
+
+                        modalTitle.textContent = info.event.title;
+                        modalBody.textContent = `Data: ${info.event.start.toLocaleDateString()}`;
+
+                        const bootstrapModal = new bootstrap.Modal(
+                            document.querySelector(".modal")
+                        );
+                        bootstrapModal.show();
+                    },
+                    height: 'auto',
+                    selectable: true,
+                    views: {
+                        dayGridMonth: {
+                            titleFormat: {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                            },
+                        },
+                    },
+                    initialView: "dayGridMonth",
+                    locale: "pt-br",
+                });
+
+                calendar.render();
+                let obj = new XMLHttpRequest();
+                obj.open("GET", url, true);
+                obj.onreadystatechange = function () {
+                    if (obj.readyState == 4 && obj.status == 200) {
+                        var resposta = JSON.parse(obj.responseText);
+                        console.log(resposta);
+                        for (let NovoEvento of resposta) {
+                            let dataFinal = new Date(NovoEvento.dataFinal);
+                            dataFinal.setDate(dataFinal.getDate() + 1); // soma 1 dia
+
+                            calendar.addEvent({
+                                title: NovoEvento.nomeEvento,
+                                start: NovoEvento.dataInicial,
+                                end: dataFinal.toISOString().split("T")[0], // formata yyyy-mm-dd
+                            });
+                        }
+                    }
+                }
+                obj.send();
+            });
+        </script>
+        <div id="calendar" class="mt-4"></div>
+
+        <div class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p></p>
+                        <p id="p2"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
     </div>
 
-    <div class="box text-center">
+    <div class="box2 text-center mb-5">
         <h2 class="mb-4">Pesquisar Evento</h2>
-        <input type="text" id="pesquisa" class="mb-4" placeholder="Pesquisar Evento"/>
+        <input type="text" id="pesquisa" class="mb-4" placeholder="Pesquisar Evento" />
         <button id="btnPesquisar" onclick="FuncaoPesquisa()" class="btn btn-primary">Pesquisar</button>
         <table id="tabelaEventos" class="table text-light mt-4">
             <thead>
@@ -89,7 +174,7 @@
             frm.reset();
         })
 
-        function FuncaoPesquisa(){
+        function FuncaoPesquisa() {
             let pesquisa = document.getElementById("pesquisa").value.trim();
             let url = `http://localhost:5000/datasFiltro?nomeEvento=${pesquisa}`
             let obj = new XMLHttpRequest();
@@ -111,7 +196,7 @@
                     });
                 }
             };
-            obj.send();      
+            obj.send();
         }
     </script>
 </body>
