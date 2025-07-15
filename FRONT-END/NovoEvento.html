@@ -37,6 +37,24 @@
         </form>
     </div>
 
+    <div class="box text-center">
+        <h2 class="mb-4">Pesquisar Evento</h2>
+        <input type="text" id="pesquisa" class="mb-4" placeholder="Pesquisar Evento"/>
+        <button id="btnPesquisar" onclick="FuncaoPesquisa()" class="btn btn-primary">Pesquisar</button>
+        <table id="tabelaEventos" class="table text-light mt-4">
+            <thead>
+                <tr>
+                    <th scope="col">Id do evento</th>
+                    <th scope="col">Nome do Evento</th>
+                    <th scope="col">Data Inicial</th>
+                    <th scope="col">Data Final</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyEventos">
+                <!-- Os eventos serão inseridos aqui -->
+            </tbody>
+    </div>
+
     <script>
         let frm = document.querySelector("form");
         let data = {}
@@ -70,6 +88,31 @@
             }
             frm.reset();
         })
+
+        function FuncaoPesquisa(){
+            let pesquisa = document.getElementById("pesquisa").value.trim();
+            let url = `http://localhost:5000/datasFiltro?nomeEvento=${pesquisa}`
+            let obj = new XMLHttpRequest();
+            obj.open("GET", url, true);
+            obj.onreadystatechange = function () {
+                if (obj.readyState == 4 && obj.status == 200) {
+                    let eventos = JSON.parse(obj.responseText);
+                    let tbody = document.getElementById("tbodyEventos");
+                    tbody.innerHTML = ""; // Limpa a tabela antes de adicionar novos eventos
+                    eventos.forEach(evento => {
+                        let tr = document.createElement("tr");
+                        tr.innerHTML += `
+                        <td>${evento.id}</td>
+                        <td>${evento.nomeEvento}</td>
+                        <td>${evento.dataInicial}</td>
+                        <td>${evento.dataFinal}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            };
+            obj.send();      
+        }
     </script>
 </body>
 
