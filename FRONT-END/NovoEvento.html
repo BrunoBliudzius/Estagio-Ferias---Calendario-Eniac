@@ -30,7 +30,9 @@
                 <label for="DataEvento">Qual data Final:</label>
                 <input type="date" id="DataEvento2" name="DataEvento2" required />
                 <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" />
-                <button id="voltar"><a href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/calendarioUser.html">Ir para calendario</a></button>
+                <button id="voltar"><a
+                        href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/calendarioUser.html">Ir para
+                        calendario</a></button>
             </fieldset>
         </form>
     </div>
@@ -47,7 +49,7 @@
                 alert("O nome do evento deve ter pelo menos 3 caracteres.");
                 e.preventDefault();
             } else {
-                e.preventDefault(); 
+                e.preventDefault();
                 let url = "http://localhost:5000/datas";
                 let obj = new XMLHttpRequest();
                 obj.open("POST", url, true);
@@ -66,6 +68,7 @@
                     }
                 }; obj.send(JSON.stringify(data));
             }
+            frm.reset();
         })
     </script>
 </body>

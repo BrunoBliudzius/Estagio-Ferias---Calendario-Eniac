@@ -56,5 +56,97 @@ def add_evento():
 
     return jsonify({'message': 'Evento inserido com sucesso'}), 201
 
+@app.route('/datas/<int:id>', methods=['PUT'])
+def atualizar_evento(id):
+    dados = request.get_json()
+
+    nomeEvento = dados.get('nomeEvento')
+    dataInicial = dados.get('dataInicial')
+    dataFinal = dados.get('dataFinal')
+    descricao = dados.get('descricao')
+
+    # Validação básica
+    if not nomeEvento or not dataInicial or not dataFinal:
+        return jsonify({'erro': 'Campos obrigatórios faltando'}), 400
+
+    conexao = get_db_connection()
+    cursor = conexao.cursor()
+
+    sql = """
+        UPDATE dados
+        SET nomeEvento = %s,
+            dataInicial = %s,
+            dataFinal = %s,
+            descricao = %s
+        WHERE id = %s
+    """
+
+    valores = (nomeEvento, dataInicial, dataFinal, descricao, id)
+
+    cursor.execute(sql, valores)
+    conexao.commit()
+
+    linhas_afetadas = cursor.rowcount
+
+    cursor.close()
+    conexao.close()
+
+    if linhas_afetadas == 0:
+        return jsonify({'erro': 'Evento não encontrado'}), 404
+
+    return jsonify({'mensagem': 'Evento atualizado com sucesso'})
+
+@app.route('/datas/<int:id>', methods=['DELETE'])
+def deletar_evento(id):
+    conexao = get_db_connection()
+    cursor = conexao.cursor()
+
+    sql = "DELETE FROM dados WHERE id = %s"
+    valores = (id,)
+
+    cursor.execute(sql, valores)
+    conexao.commit()
+
+    linhas_afetadas = cursor.rowcount
+
+    cursor.close()
+    conexao.close()
+
+    if linhas_afetadas == 0:
+        return jsonify({'erro': 'Evento não encontrado'}), 404
+
+    return jsonify({'mensagem': 'Evento excluído com sucesso'})
+
+@app.route('/datasFiltro', methods=['GET'])
+def obter_evento_por_nome():
+    nome_evento = request.args.get('nomeEvento')
+
+    if not nome_evento:
+        return jsonify({'erro': 'Parâmetro nomeEvento é obrigatório'}), 400
+
+    conexao = get_db_connection()
+    cursor = conexao.cursor(pymysql.cursors.DictCursor)
+
+    sql = "SELECT * FROM dados WHERE nomeEvento LIKE %s"
+    valor = ('%' + nome_evento + '%',)
+
+    cursor.execute(sql, valor)
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conexao.close()
+
+    eventos = []
+    for row in rows:
+        eventos.append({
+            'id': row['id'],
+            'nomeEvento': row['nomeEvento'],
+            'dataInicial': row['dataInicial'],
+            'dataFinal': row['dataFinal'],
+            'descricao': row['descricao']
+        })
+
+    return jsonify(eventos)
+
 if __name__ == '__main__':
     app.run(port=5000, host='localhost', debug=True)
