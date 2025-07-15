@@ -13,33 +13,41 @@
     />
     <link rel="stylesheet" href="login.css" />
 
-   <script>
-  function verificarLogin(event) {
-    event.preventDefault(); // Impede o recarregamento da página
+    <script>
+      function verificarLogin(event) {
+        event.preventDefault();
 
-    var usuario = document.getElementById("nome").value;
-    var senha = document.getElementById("senha").value;
-    var mensagem = document.getElementById("mensagem");
+        var usuario = document.getElementById("nome").value;
+        var senha = document.getElementById("senha").value;
+        var mensagem = document.getElementById("mensagem");
+        var formulario = event.target; // o próprio formulário
 
-    // Limpa qualquer mensagem anterior
-    mensagem.textContent = "";
+        mensagem.textContent = "";
 
-    // Verificacao do login + senha
-    if (usuario === "admin" && senha === "123admin") {
-      mensagem.style.color = "green";
-      mensagem.textContent = "Login feito com sucesso...";
+        if (usuario === "admin" && senha === "123admin") {
+          mensagem.style.color = "green";
+          mensagem.textContent = "Login feito com sucesso...";
 
-      // Redireciona após 3.5 segundos
-      setTimeout(() => {
-        window.location.href = "http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/NovoEvento.html";
-      }, 1800);
-    } else {
-      mensagem.style.color = "red";
-      mensagem.textContent = "Login não confirmado";
-    }
-  }
-</script>
+          // Define a flag de login na sessionStorage
+          sessionStorage.setItem("logado", "true");
 
+          setTimeout(() => {
+            mensagem.textContent = "";
+          }, 2000);
+
+          setTimeout(() => {
+            formulario.reset(); // reseta o formulário ANTES de redirecionar
+            window.location.href =
+              "http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/NovoEvento.html";
+          }, 2500); // tempo ajustado para 2,5 segundos, como você mencionou
+        } else {
+          mensagem.style.color = "red";
+          mensagem.textContent = "Login não confirmado";
+          // Remove a flag de login se as credenciais estiverem erradas
+          sessionStorage.removeItem("logado");
+        }
+      }
+    </script>
   </head>
 
   <body>
@@ -58,7 +66,7 @@
         <fieldset>
           <br />
           <legend><b>Login Administrador</b></legend>
-          <br><br>
+          <br /><br />
 
           <div class="inputBox">
             <input
