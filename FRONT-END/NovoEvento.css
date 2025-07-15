@@ -6,37 +6,59 @@
   height: 100px;
 }
 
+
 #eniac {
   padding: 15px;
   max-height: 90px;
 }
 
+
 body {
   font-family: Arial, Helvetica, sans-serif;
-  background-color: #f5f5f5; 
+  background-color: #f5f5f5;
   margin: 0;
   padding: 0;
 }
 
-/* Aumentado tamanho da box, com mais espaço e sombra */
-.box {
-  margin: 50px auto;
-  background-color: #054161;
-  padding: 10px 10px;
-  border-radius: 15px;
-  color: white;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+
+/* Adicione isso ao NovoEvento.css ou modifique os estilos .box existentes */
+.container-fluid {
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
-.box2{
-  max-width: 800px;      /* controla a largura */
-  margin: 0 auto;        /* centraliza horizontalmente */
-  background-color: #004060; /* cor de fundo opcional */
-  padding: 30px;
-  border-radius: 10px;
-  color: white;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+
+.box {
+    /* Mantenha os estilos existentes */
+    position: relative; /* Alterado de absolute */
+    margin: 0; /* Remove a margem automática, pois estará em uma coluna */
+    background-color: #054161;
+    padding: 40px 30px;
+    border-radius: 15px;
+    width: 100%; /* Faz com que ocupe a largura total de sua coluna */
+    color: white;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 }
+
+
+#calendar {
+    padding: 15px;
+    background-color: white; /* Exemplo de fundo */
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+/* Para textarea, se você adicioná-lo para descrição */
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 15px;
+  margin-bottom: 10px;
+  resize: vertical; /* Permite redimensionamento vertical */
+}
+
+
 /* Campo com borda destacada */
 fieldset {
   border: 3px solid #ffe466;
@@ -44,6 +66,7 @@ fieldset {
   padding: 20px;
   border-radius: 10px;
 }
+
 
 /* Ajustes para espaçar inputs */
 label {
@@ -53,6 +76,7 @@ label {
   text-align: left;
   font-weight: 500;
 }
+
 
 input[type="text"],
 input[type="date"] {
@@ -64,8 +88,10 @@ input[type="date"] {
   margin-bottom: 10px;
 }
 
+
 #cadastrarEvento,
-#voltar {
+#voltar,
+#atualizarEvento {
   background-color: #ffe466;
   width: 100%;
   padding: 15px;
@@ -78,11 +104,13 @@ input[type="date"] {
   font-weight: bold;
 }
 
+
 #cadastrarEvento:hover,
 #voltar:hover {
   background-color: #ffd633;
   color: #00394f;
 }
+
 
 .inputBox {
   position: relative;
@@ -90,6 +118,7 @@ input[type="date"] {
   margin-left: 10px;
   margin-right: 10px;
 }
+
 
 .inputUser {
   background: none;
@@ -102,6 +131,7 @@ input[type="date"] {
   letter-spacing: 2px;
 }
 
+
 .labelInput {
   position: absolute;
   top: 0px;
@@ -110,40 +140,10 @@ input[type="date"] {
   transition: 0.5s;
 }
 
+
 .inputUser:focus~.labelInput,
 .inputUser:valid~.labelInput {
   top: -20px;
   font-size: 12px;
   color: white;
-}
-
-.container-flex {
-  display: flex;
-  align-items: flex-start; /* alinha no topo */
-  gap: 20px; /* espaço entre form e calendário */
-}
-
-#formulario {
-  flex: 1;
-  max-width: 500px;
-  height: 10vh;
-}
-
-#calendar {
-  flex: 1; /* o calendário ocupa o resto */
-  max-width: 600px; /* largura desejada */
-}
-
-#calendar {
-  flex: 1; /* o calendário ocupa o resto */
-  max-width: 600px; /* largura desejada */
-}
-
-@media (max-width: 768px) {
-  .container-flex {
-    flex-direction: column; /* empilha no mobile */
-  }
-  #calendar {
-    max-width: 100%;
-  }
 }
