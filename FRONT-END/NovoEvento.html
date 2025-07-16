@@ -1,310 +1,189 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
-
 <head>
-    <meta charset="utf-8" />
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
-    <link rel="stylesheet" href="NovoEvento.css" />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
-
+  <meta charset="utf-8" />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
+  <link rel="stylesheet" href="NovoEvento.css" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-
-
 <body>
-    <div class="divCabecalho">
-        <a href="https://www.eniac.edu.br/">
-            <img src="http://localhost/Estagio-Ferias---Calendario-Eniac/imagens/path32.png" alt="Logo Eniac"
-                id="eniac" />
-        </a>
+  <div class="divCabecalho">
+    <a href="https://www.eniac.edu.br/">
+      <img src="http://localhost/Estagio-Ferias---Calendario-Eniac/imagens/path32.png" alt="Logo Eniac" id="eniac" />
+    </a>
+  </div>
+
+  <div class="container-flex">
+    <div class="formulario ms-5">
+      <div class="box">
+        <form id="formEvento">
+          <fieldset>
+            <br />
+            <legend><b>Cadastrar novo Evento</b></legend>
+            <label for="NomeEvento">Nome do Evento</label>
+            <input type="text" id="NomeEvento" name="NomeEvento" required />
+            <label for="DataEvento">Data Inicial:</label>
+            <input type="date" id="DataEvento" name="DataEvento" required />
+            <label for="DataEvento2">Data Final:</label>
+            <input type="date" id="DataEvento2" name="DataEvento2" required />
+            <label for="CorEvento">Cor do Evento:</label>
+            <input type="color" id="CorEvento" name="CorEvento" value="#3788d8" />
+            <label for="Descricao">Descrição:</label>
+            <textarea id="Descricao" name="Descricao" rows="2"></textarea>
+            <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" />
+            <button id="voltar">
+              <a href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/calendarioUser.html">
+                Ir para calendário
+              </a>
+            </button>
+          </fieldset>
+        </form>
+      </div>
     </div>
 
+    <div id="calendar" class="mt-4"></div>
 
-    <div class="container-fluid mt-4">
-        <div class="row">
-            <div class="col-md-5">
-                <div class="box">
-                    <form id="eventForm">
-                        <fieldset>
-                            <br />
-                            <legend><b>Cadastrar novo Evento</b></legend>
-                            <div id="Container"></div>
-                            <label for="NomeEvento">Nome do Evento</label>
-                            <input type="text" id="NomeEvento" name="NomeEvento" required />
-                            <label for="DataInicial">Qual data inicial:</label>
-                            <input type="date" id="DataInicial" name="DataInicial" required />
-                            <label for="DataFinal">Qual data Final:</label>
-                            <input type="date" id="DataFinal" name="DataFinal" required />
-                            <label for="Descricao">Descrição (Opcional):</label>
-                            <textarea id="Descricao" name="Descricao" rows="3"></textarea>
-                            <label for="eventColor">Cor do Evento:</label>
-                            <input type="color" id="eventColor" name="eventColor" value="#054161" />
-
-
-                            <input type="hidden" id="eventId" name="eventId" />
-                            <button type="submit" id="cadastrarEvento">Cadastrar Evento</button>
-                            <button type="button" id="atualizarEvento" style="display:none;">Atualizar Evento</button>
-                           
-                            <button id="voltar"><a
-                                    href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/calendarioUser.html">Ir
-                                    para calendario</a></button>
-                        </fieldset>
-                    </form>
-                </div>
-            </div>
-            <div class="col-md-7">
-                <div id="calendar" style="margin-top: 50px;"></div>
-            </div>
+    <div class="modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <p></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Fechar
+            </button>
+            <button type="button" class="btn btn-danger" onclick="FuncaoDeletar()">
+              Deletar Evento
+            </button>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="box2 text-center mb-5">
+      <h2 class="mb-4">Pesquisar Evento</h2>
+      <input type="text" id="pesquisa" class="mb-4" placeholder="Pesquisar Evento" />
+      <button id="btnPesquisar" onclick="FuncaoPesquisa()" class="btn btn-primary">Pesquisar</button>
+      <table id="tabelaEventos" class="table text-light mt-4">
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Nome</th>
+            <th scope="col">Data Inicial</th>
+            <th scope="col">Data Final</th>
+            <th scope="col">Cor</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyEventos"></tbody>
+      </table>
     </div>
 
+  <script>
+    let idEventoSelecionado = null;
 
-    <div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="eventDetailModalLabel"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="modalEventName"></p>
-                    <p id="modalEventDates"></p>
-                    <p id="modalEventDescription"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="editEventBtn" data-bs-dismiss="modal">Editar</button>
-                    <button type="button" class="btn btn-danger" id="deleteEventBtn" data-bs-dismiss="modal">Deletar</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    document.addEventListener("DOMContentLoaded", async function () {
+      let calendarEl = document.getElementById("calendar");
+      let calendar = new FullCalendar.Calendar(calendarEl, {
+        eventClick: function (info) {
+          document.querySelector(".modal-title").textContent = info.event.title;
+          document.querySelector(".modal-body p").textContent = `Data: ${info.event.start.toLocaleDateString()}`;
+          idEventoSelecionado = info.event.id;
+          new bootstrap.Modal(document.querySelector(".modal")).show();
+        },
+        height: "auto",
+        initialView: "dayGridMonth",
+        locale: "pt-br",
+      });
+      calendar.render();
 
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            let calendarEl = document.getElementById("calendar");
-            let eventForm = document.getElementById("eventForm");
-            let cadastrarEventoBtn = document.getElementById("cadastrarEvento");
-            let atualizarEventoBtn = document.getElementById("atualizarEvento");
-            let deletarEventoBtn = document.getElementById("deletarEvento"); // Este é o botão de deletar no formulário
-            let eventIdField = document.getElementById("eventId");
-
-
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                height: "auto", // Ajuste a altura conforme necessário
-                selectable: true, // Sua configuração existente
-                views: { // Suas views existentes
-                    dayGridMonth: {
-                        titleFormat: {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                        },
-                    },
-                },
-                initialView: "dayGridMonth", // Sua visualização inicial existente
-                locale: "pt-br", // Seu idioma existente
-                eventClick: function (info) {
-                    // Preenche o modal com os detalhes do evento
-                    document.getElementById('modalEventName').textContent = `Evento: ${info.event.title}`;
-                    document.getElementById('modalEventDates').textContent = `De: ${info.event.start.toLocaleDateString()} Até: ${info.event.end ? info.event.end.toLocaleDateString() : 'N/A'}`;
-                    document.getElementById('modalEventDescription').textContent = `Descrição: ${info.event.extendedProps.descricao || 'Nenhuma descrição.'}`;
-
-
-                    // Define o ID do evento para os botões de editar/deletar do modal
-                    document.getElementById('editEventBtn').setAttribute('data-event-id', info.event.id);
-                    document.getElementById('deleteEventBtn').setAttribute('data-event-id', info.event.id);
-
-
-                    // Mostra o modal
-                    let eventDetailModal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
-                    eventDetailModal.show();
-                }
-            });
-
-
-            calendar.render();
-
-
-            function fetchAndRenderEvents() {
-                let url = "http://localhost:5000/datas";
-                let obj = new XMLHttpRequest();
-                obj.open("GET", url, true);
-                obj.onreadystatechange = function () {
-                    if (obj.readyState == 4 && obj.status == 200) {
-                        let resposta = JSON.parse(obj.responseText);
-                        console.log("Fetched events:", resposta);
-                        calendar.removeAllEvents(); // Limpa os eventos existentes
-                        for (let NovoEvento of resposta) {
-                            let dataFinal = new Date(NovoEvento.dataFinal);
-                            dataFinal.setDate(dataFinal.getDate() + 1); // A data final do FullCalendar é exclusiva
-
-
-                            calendar.addEvent({
-                                id: NovoEvento.id,
-                                title: NovoEvento.nomeEvento,
-                                start: NovoEvento.dataInicial,
-                                end: dataFinal.toISOString().split("T")[0],
-                                description: NovoEvento.descricao, // Adiciona descrição
-                                color: NovoEvento.eventColor || '#054161', // Usa a cor do DB ou padrão
-                                extendedProps: {
-                                    descricao: NovoEvento.descricao // Armazena a descrição em extendedProps
-                                }
-                            });
-                        }
-                    } else if (obj.readyState == 4) {
-                        console.error("Error fetching events:", obj.status, obj.responseText);
-                    }
-                };
-                obj.send();
-            }
-
-
-            fetchAndRenderEvents(); // Busca inicial
-
-
-            eventForm.addEventListener("submit", function (e) {
-                e.preventDefault();
-                let NomeEvento = document.getElementById("NomeEvento").value.trim();
-                let DataInicial = document.getElementById("DataInicial").value.trim();
-                let DataFinal = document.getElementById("DataFinal").value.trim();
-                let Descricao = document.getElementById("Descricao").value.trim();
-                let EventColor = document.getElementById("eventColor").value;
-
-
-                if (NomeEvento.length < 3) {
-                    alert("O nome do evento deve ter pelo menos 3 caracteres.");
-                    return;
-                }
-
-
-                let url = "http://localhost:5000/datas";
-                let method = "POST";
-                let data = {
-                    nomeEvento: NomeEvento,
-                    dataInicial: DataInicial,
-                    dataFinal: DataFinal,
-                    descricao: Descricao,
-                    eventColor: EventColor
-                };
-
-
-                let currentEventId = eventIdField.value;
-
-
-                if (currentEventId) { // Se eventId estiver presente, é uma atualização
-                    url = `http://localhost:5000/datas/${currentEventId}`;
-                    method = "PUT";
-                }
-
-
-                let obj = new XMLHttpRequest();
-                obj.open(method, url, true);
-                obj.setRequestHeader("Content-Type", "application/json");
-
-
-                obj.onreadystatechange = function () {
-                    if (obj.readyState == 4) {
-                        if (obj.status == 200 || obj.status == 201) {
-                            console.log(obj.responseText);
-                            alert(currentEventId ? "Evento atualizado com sucesso!" : "Evento cadastrado com sucesso!");
-                            eventForm.reset();
-                            eventIdField.value = ''; // Limpa eventId
-                            cadastrarEventoBtn.style.display = 'block';
-                            atualizarEventoBtn.style.display = 'none';
-                            deletarEventoBtn.style.display = 'none'; // Oculta deletar após cadastro/atualização
-                            fetchAndRenderEvents(); // Busca e renderiza novamente os eventos
-                        } else {
-                            console.error("Error:", obj.status, obj.responseText);
-                            alert("Erro ao " + (currentEventId ? "atualizar" : "cadastrar") + " evento.");
-                        }
-                    }
-                };
-                obj.send(JSON.stringify(data));
-            });
-
-
-            document.getElementById('editEventBtn').addEventListener('click', function() {
-                const eventId = this.getAttribute('data-event-id');
-                const event = calendar.getEventById(eventId);
-                if (event) {
-                    document.getElementById("NomeEvento").value = event.title;
-                    document.getElementById("DataInicial").value = event.startStr;
-                    document.getElementById("DataFinal").value = event.end ? event.end.toISOString().split('T')[0] : '';
-                    document.getElementById("Descricao").value = event.extendedProps.descricao || '';
-                    document.getElementById("eventColor").value = event.backgroundColor || '#054161';
-                    eventIdField.value = event.id;
-
-
-                    cadastrarEventoBtn.style.display = 'none';
-                    atualizarEventoBtn.style.display = 'block';
-                    deletarEventoBtn.style.display = 'block'; // Mostra o botão deletar no formulário ao editar
-                }
-            });
-
-
-            document.getElementById('atualizarEvento').addEventListener('click', function() {
-                eventForm.dispatchEvent(new Event('submit')); // Dispara o submit do formulário para atualização
-            });
-
-
-            document.getElementById('deleteEventBtn').addEventListener('click', function() { // Botão deletar do modal
-                const eventId = this.getAttribute('data-event-id');
-                if (confirm("Tem certeza que deseja deletar este evento?")) {
-                    let url = `http://localhost:5000/datas/${eventId}`;
-                    let obj = new XMLHttpRequest();
-                    obj.open("DELETE", url, true);
-                    obj.onreadystatechange = function () {
-                        if (obj.readyState == 4) {
-                            if (obj.status == 200) {
-                                alert("Evento deletado com sucesso!");
-                                fetchAndRenderEvents();
-                            } else {
-                                console.error("Error deleting event:", obj.status, obj.responseText);
-                                alert("Erro ao deletar evento.");
-                            }
-                        }
-                    };
-                    obj.send();
-                }
-            });
-
-
-            document.getElementById('deletarEvento').addEventListener('click', function() { // Botão deletar do formulário
-                const eventId = eventIdField.value; // Pega o ID do campo oculto no formulário
-                if (eventId && confirm("Tem certeza que deseja deletar este evento?")) {
-                    let url = `http://localhost:5000/datas/${eventId}`;
-                    let obj = new XMLHttpRequest();
-                    obj.open("DELETE", url, true);
-                    obj.onreadystatechange = function () {
-                        if (obj.readyState == 4) {
-                            if (obj.status == 200) {
-                                alert("Evento deletado com sucesso!");
-                                eventForm.reset(); // Limpa o formulário
-                                eventIdField.value = ''; // Limpa eventId
-                                cadastrarEventoBtn.style.display = 'block';
-                                atualizarEventoBtn.style.display = 'none';
-                                deletarEventoBtn.style.display = 'none'; // Oculta deletar após a exclusão
-                                fetchAndRenderEvents();
-                            } else {
-                                console.error("Error deleting event:", obj.status, obj.responseText);
-                                alert("Erro ao deletar evento.");
-                            }
-                        }
-                    };
-                    obj.send();
-                } else if (!eventId) {
-                    alert("Nenhum evento selecionado para deletar.");
-                }
-            });
+      const res = await fetch("http://localhost:5000/datas");
+      const eventos = await res.json();
+      eventos.forEach(evt => {
+        let dataFinal = new Date(evt.dataFinal);
+        dataFinal.setDate(dataFinal.getDate() + 1);
+        calendar.addEvent({
+          id: evt.id,
+          title: evt.nomeEvento,
+          start: evt.dataInicial,
+          end: dataFinal.toISOString().split("T")[0],
+          color: evt.eventColor || "#3788d8"
         });
-    </script>
+      });
+    });
+
+    document.getElementById("formEvento").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const NomeEvento = document.getElementById("NomeEvento").value.trim();
+      const DataEvento = document.getElementById("DataEvento").value.trim();
+      const DataEvento2 = document.getElementById("DataEvento2").value.trim();
+      const CorEvento = document.getElementById("CorEvento").value.trim();
+      const Descricao = document.getElementById("Descricao").value.trim();
+
+      if (NomeEvento.length < 3) {
+        alert("O nome do evento deve ter pelo menos 3 caracteres.");
+        return;
+      }
+
+      const res = await fetch("http://localhost:5000/datas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nomeEvento: NomeEvento,
+          dataInicial: DataEvento,
+          dataFinal: DataEvento2,
+          descricao: Descricao,
+          eventColor: CorEvento
+        }),
+      });
+
+      if (res.ok || res.status === 201) {
+        alert("Evento cadastrado com sucesso!");
+        location.reload();
+      } else {
+        alert("Erro ao cadastrar evento!");
+      }
+    });
+
+    async function FuncaoPesquisa() {
+      const pesquisa = document.getElementById("pesquisa").value.trim();
+      const res = await fetch(`http://localhost:5000/datasFiltro?nomeEvento=${pesquisa}`);
+      const eventos = await res.json();
+      const tbody = document.getElementById("tbodyEventos");
+      tbody.innerHTML = "";
+      eventos.forEach(evt => {
+        tbody.innerHTML += `<tr>
+          <td>${evt.id}</td>
+          <td>${evt.nomeEvento}</td>
+          <td>${evt.dataInicial}</td>
+          <td>${evt.dataFinal}</td>
+          <td style="background:${evt.eventColor}">${evt.eventColor}</td>
+        </tr>`;
+      });
+    }
+
+    async function FuncaoDeletar() {
+      if (!idEventoSelecionado) {
+        alert("Nenhum evento selecionado!");
+        return;
+      }
+        const res = await fetch(`http://localhost:5000/datas/${idEventoSelecionado}`, {
+          method: "DELETE"
+        });
+        if (res.ok) {
+          alert("Evento deletado com sucesso!");
+          location.reload();
+        } else {
+          alert("Erro ao deletar evento.");
+        }
+    }
+  </script>
 </body>
-
-
 </html>

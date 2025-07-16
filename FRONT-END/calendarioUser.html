@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
-
 <head>
   <meta charset="utf-8" />
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.js"></script>
@@ -10,112 +8,83 @@
   <link rel="stylesheet" href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/calendarioUser.css" />
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    let url = "http://localhost:5000/datas";
-    var calendarEl = document.getElementById("calendar");
+    document.addEventListener("DOMContentLoaded", function () {
+      let url = "http://localhost:5000/datas";
+      var calendarEl = document.getElementById("calendar");
 
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        eventClick: function (info) {
+          const modalTitle = document.querySelector(".modal-title");
+          const modalBody = document.querySelector(".modal-body p");
 
-    // Estas são as SUAS CONFIGURAÇÕES ATUAIS DO FullCalendar.
-    // Eu NÃO ESTOU MUDANDO NADA AQUI.
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-      eventClick: function (info) {
-        // Preenche o NOVO modal com os detalhes do evento
-        document.getElementById('modalEventName').textContent = info.event.title;
-       
-        // Ajuste para exibir a data final corretamente (FullCalendar usa end date exclusiva)
-        const endDate = info.event.end ? new Date(info.event.end.getTime() - (24 * 60 * 60 * 1000)) : null;
-        document.getElementById('modalEventStartDate').textContent = info.event.start.toLocaleDateString();
-        document.getElementById('modalEventEndDate').textContent = endDate ? endDate.toLocaleDateString() : info.event.start.toLocaleDateString();
+          modalTitle.textContent = info.event.title;
+          modalBody.textContent = `Data: ${info.event.start.toLocaleDateString()}`;
 
-
-        // A descrição agora está em extendedProps (necessário que o backend envie)
-        document.getElementById('modalEventDescription').textContent = info.event.extendedProps.descricao || 'Nenhuma descrição.';
-
-
-        // Mostra o NOVO modal pelo ID (necessário Bootstrap JS para isso)
-        let eventDetailModal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
-        eventDetailModal.show();
-      },
-      height: "90vh", // Sua altura existente
-      selectable: true, // Sua configuração existente
-      views: { // Suas views existentes
-        dayGridMonth: {
-          titleFormat: {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
+          const bootstrapModal = new bootstrap.Modal(
+            document.querySelector(".modal")
+          );
+          bootstrapModal.show();
+        },
+        height: 'auto',
+        selectable: true,
+        views: {
+          dayGridMonth: {
+            titleFormat: {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            },
           },
         },
-      },
-      initialView: "dayGridMonth", // Sua visualização inicial existente
-      locale: "pt-br", // Seu idioma existente
-      // Se você tiver outras configurações do FullCalendar (como headerToolbar),
-      // adicione-as de volta AQUI, dentro deste objeto.
-    });
+        initialView: "dayGridMonth",
+        locale: "pt-br",
+      });
 
+      calendar.render();
 
-    calendar.render(); // Renderiza o calendário
-
-
-    // Função para buscar e renderizar os eventos
-    function fetchAndRenderEvents() {
       let obj = new XMLHttpRequest();
       obj.open("GET", url, true);
       obj.onreadystatechange = function () {
         if (obj.readyState == 4 && obj.status == 200) {
           var resposta = JSON.parse(obj.responseText);
-          console.log("Fetched events for calendarUser:", resposta);
-          calendar.removeAllEvents(); // Limpa eventos existentes antes de adicionar os novos
+          console.log(resposta);
           for (let NovoEvento of resposta) {
             let dataFinal = new Date(NovoEvento.dataFinal);
-            // FullCalendar espera que 'end' seja o dia APÓS o último dia do evento.
             dataFinal.setDate(dataFinal.getDate() + 1);
 
-
             calendar.addEvent({
-              id: NovoEvento.id, // É bom ter o ID
+              id: NovoEvento.id,
               title: NovoEvento.nomeEvento,
               start: NovoEvento.dataInicial,
-              end: dataFinal.toISOString().split("T")[0], // Formato YYYY-MM-DD
-              // ADICIONADO: Armazena a descrição em extendedProps para uso no modal
-              extendedProps: {
-                descricao: NovoEvento.descricao
-              },
-              // ADICIONADO: Aplica a cor do banco de dados ou um padrão
-              color: NovoEvento.eventColor || '#054161'
+              end: dataFinal.toISOString().split("T")[0],
+              color: NovoEvento.eventColor || "#3788d8" // ✅ COR VINDO DA API
             });
           }
-        } else if (obj.readyState == 4) {
-          console.error("Error fetching events for calendarUser:", obj.status, obj.responseText);
         }
-      };
+      }
       obj.send();
-    }
-
-
-    fetchAndRenderEvents(); // Chama a função para carregar os eventos quando a página carrega
-  });
-</script>
+    });
+  </script>
 </head>
-
 
 <body>
   <div class="divCabecalho">
     <div class="esquerda">
-      <button id="evento"><a href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/login.html">EVENTO
-          AQUI</a></button>
+      <button id="evento">
+        <a href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/login.html">
+          EVENTO AQUI
+        </a>
+      </button>
     </div>
     <div class="centro">
       <a href="https://www.eniac.edu.br/">
-        <img src="http://localhost/Estagio-Ferias---Calendario-Eniac/imagens/path32.png " alt="" id="eniac" /></a>
+        <img src="http://localhost/Estagio-Ferias---Calendario-Eniac/imagens/path32.png" alt="" id="eniac" />
+      </a>
     </div>
   </div>
 
-
   <div id="calendar"></div>
-
 
   <div class="modal" tabindex="-1">
     <div class="modal-dialog">
@@ -130,32 +99,11 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-            Close
+            Fechar
           </button>
         </div>
       </div>
     </div>
   </div>
-  <div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="eventDetailModalLabel">Detalhes do Evento</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p><strong>Evento:</strong> <span id="modalEventName"></span></p>
-        <p><strong>De:</strong> <span id="modalEventStartDate"></span></p>
-        <p><strong>Até:</strong> <span id="modalEventEndDate"></span></p>
-        <p><strong>Descrição:</strong> <span id="modalEventDescription"></span></p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-      </div>
-    </div>
-  </div>
-</div>
 </body>
-
-
 </html>
