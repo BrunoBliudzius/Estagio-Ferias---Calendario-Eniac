@@ -68,6 +68,7 @@ def atualizar_evento(id):
     dataInicial = dados.get('dataInicial')
     dataFinal = dados.get('dataFinal')
     descricao = dados.get('descricao', '')
+    eventColor 	 = dados.get('eventColor', '')
 
     if not nomeEvento or not dataInicial or not dataFinal:
         return jsonify({'erro': 'Campos obrigatórios faltando'}), 400
@@ -81,9 +82,10 @@ def atualizar_evento(id):
                 dataInicial = %s,
                 dataFinal = %s,
                 descricao = %s
+                eventColor 	= %s
             WHERE id = %s
         """
-        valores = (nomeEvento, dataInicial, dataFinal, descricao, id)
+        valores = (nomeEvento, dataInicial, dataFinal, descricao, eventColor,id)
         cursor.execute(sql, valores)
         conexao.commit()
 

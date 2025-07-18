@@ -138,7 +138,6 @@
                     document.querySelector(".modal-title").textContent = info.event.title;
                     document.querySelector(".modal-body p").textContent = `Data: ${info.event.start.toLocaleDateString()}`;
                     idEventoSelecionado = info.event.id;
-                    new bootstrap.Modal(document.querySelector(".modal")).show();
 
                     const event = info.event;
                     idEventoSelecionado = event.id;
@@ -150,8 +149,15 @@
                     // Armazena os dados em variáveis para edição posterior
                     document.getElementById("editNomeEvento").value = event.title;
                     document.getElementById("editDataInicial").value = event.startStr;
-                    document.getElementById("editDataFinal").value = event.endStr ? event.endStr.split("T")[0] : event.startStr;
-                    document.getElementById("editCorEvento").value = event.backgroundColor || "#3788d8";
+                    if (event.endStr) {
+                        let dataFinalReal = new Date(event.endStr);
+                        dataFinalReal.setDate(dataFinalReal.getDate() - 1);
+                        document.getElementById("editDataFinal").value = dataFinalReal.toISOString().split("T")[0];
+                    } else {
+                        document.getElementById("editDataFinal").value = event.startStr;
+                    }
+                    document.getElementById("editCorEvento").value = event.backgroundColor;
+                    document.getElementById("editDescricao").value = event.extendedProps.descricao || "";
 
                     // Exibe modal principal
                     new bootstrap.Modal(document.querySelector(".modal")).show();
@@ -171,8 +177,12 @@
                     id: evt.id,
                     title: evt.nomeEvento,
                     start: evt.dataInicial,
+                    allday: true,
                     end: dataFinal.toISOString().split("T")[0],
-                    color: evt.eventColor || "#3788d8"
+                    color: evt.eventColor || "#3788d8",
+                    extendedProps: {
+                        descricao: evt.descricao || ""
+                    }
                 });
             });
         });
@@ -264,7 +274,7 @@
                     dataInicial,
                     dataFinal,
                     descricao,
-                    eventColor: corEvento
+                    eventColor
                 }),
             });
 
