@@ -14,6 +14,7 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
+# GET - Obter todos os eventos
 @app.route('/datas', methods=['GET'])
 def obter_eventos():
     conexao = get_db_connection()
@@ -36,6 +37,7 @@ def obter_eventos():
         cursor.close()
         conexao.close()
 
+# POST - Cadastrar novo evento
 @app.route('/datas', methods=['POST'])
 def add_evento():
     novo_evento = request.get_json()
@@ -61,6 +63,7 @@ def add_evento():
         cursor.close()
         conexao.close()
 
+# PUT - Atualizar evento existente
 @app.route('/datas/<int:id>', methods=['PUT'])
 def atualizar_evento(id):
     dados = request.get_json()
@@ -68,6 +71,7 @@ def atualizar_evento(id):
     dataInicial = dados.get('dataInicial')
     dataFinal = dados.get('dataFinal')
     descricao = dados.get('descricao', '')
+    eventColor = dados.get('eventColor')  # <- Agora é usado corretamente
 
     if not nomeEvento or not dataInicial or not dataFinal:
         return jsonify({'erro': 'Campos obrigatórios faltando'}), 400
@@ -80,10 +84,11 @@ def atualizar_evento(id):
             SET nomeEvento = %s,
                 dataInicial = %s,
                 dataFinal = %s,
-                descricao = %s
+                descricao = %s,
+                eventColor = %s
             WHERE id = %s
         """
-        valores = (nomeEvento, dataInicial, dataFinal, descricao, id)
+        valores = (nomeEvento, dataInicial, dataFinal, descricao, eventColor, id)
         cursor.execute(sql, valores)
         conexao.commit()
 
@@ -95,6 +100,7 @@ def atualizar_evento(id):
         cursor.close()
         conexao.close()
 
+# DELETE - Excluir evento
 @app.route('/datas/<int:id>', methods=['DELETE'])
 def deletar_evento(id):
     conexao = get_db_connection()
@@ -112,6 +118,7 @@ def deletar_evento(id):
         cursor.close()
         conexao.close()
 
+# GET - Filtro por nome do evento
 @app.route('/datasFiltro', methods=['GET'])
 def obter_evento_por_nome():
     nome_evento = request.args.get('nomeEvento')
@@ -132,7 +139,8 @@ def obter_evento_por_nome():
                 'nomeEvento': row['nomeEvento'],
                 'dataInicial': row['dataInicial'],
                 'dataFinal': row['dataFinal'],
-                'descricao': row['descricao']
+                'descricao': row['descricao'],
+                'eventColor': row['eventColor']  # incluir cor aqui também
             })
 
         return jsonify(eventos)
@@ -140,5 +148,6 @@ def obter_evento_por_nome():
         cursor.close()
         conexao.close()
 
+# Roda o servidor
 if __name__ == '__main__':
     app.run(port=5000, host='localhost', debug=True)
