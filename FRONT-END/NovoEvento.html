@@ -59,15 +59,9 @@
                         <p></p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" onclick="FuncaoDeletar()">
-                            Deletar Evento
-                        </button>
-                        <button type="button" class="btn btn-warning" onclick="FuncaoAtualizar()">
-                            Atualizar Evento
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Fechar
-                        </button>
+                        <button type="button" class="btn btn-danger" onclick="FuncaoDeletar()">Deletar Evento</button>
+                        <button type="button" class="btn btn-warning" onclick="FuncaoAtualizar()">Atualizar Evento</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                     </div>
                 </div>
             </div>
@@ -80,8 +74,7 @@
                     <form id="formEditarEvento">
                         <div class="modal-header">
                             <h5 class="modal-title"><strong>Editar Evento</strong></h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Fechar"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                         </div>
                         <div class="modal-body">
                             <label for="editNomeEvento"><strong>Nome:</strong></label>
@@ -107,7 +100,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <div class="box2 text-center mb-5">
@@ -117,11 +109,11 @@
         <table id="tabelaEventos" class="table text-light mt-4">
             <thead>
                 <tr>
-                    <th scope="col">Id</th>
-                    <th scope="col">Nome</th>
-                    <th scope="col">Data Inicial</th>
-                    <th scope="col">Data Final</th>
-                    <th scope="col">Cor</th>
+                    <th>Id</th>
+                    <th>Nome</th>
+                    <th>Data Inicial</th>
+                    <th>Data Final</th>
+                    <th>Cor</th>
                 </tr>
             </thead>
             <tbody id="tbodyEventos"></tbody>
@@ -135,31 +127,21 @@
             let calendarEl = document.getElementById("calendar");
             let calendar = new FullCalendar.Calendar(calendarEl, {
                 eventClick: function (info) {
-                    document.querySelector(".modal-title").textContent = info.event.title;
-                    document.querySelector(".modal-body p").textContent = `Data: ${info.event.start.toLocaleDateString()}`;
-                    idEventoSelecionado = info.event.id;
-
                     const event = info.event;
                     idEventoSelecionado = event.id;
 
-                    // Preenche os dados no modal de visualização
                     document.querySelector(".modal-title").textContent = event.title;
                     document.querySelector(".modal-body p").textContent = `Data: ${event.start.toLocaleDateString()}`;
 
-                    // Armazena os dados em variáveis para edição posterior
+                    // Preenche o modal de edição
                     document.getElementById("editNomeEvento").value = event.title;
                     document.getElementById("editDataInicial").value = event.startStr;
-                    if (event.endStr) {
-                        let dataFinalReal = new Date(event.endStr);
-                        dataFinalReal.setDate(dataFinalReal.getDate() - 1);
-                        document.getElementById("editDataFinal").value = dataFinalReal.toISOString().split("T")[0];
-                    } else {
-                        document.getElementById("editDataFinal").value = event.startStr;
-                    }
-                    document.getElementById("editCorEvento").value = event.backgroundColor;
+                    document.getElementById("editDataFinal").value = event.endStr
+                        ? new Date(new Date(event.endStr).setDate(new Date(event.endStr).getDate() - 1)).toISOString().split("T")[0]
+                        : event.startStr;
+                    document.getElementById("editCorEvento").value = event.backgroundColor || "#3788d8";
                     document.getElementById("editDescricao").value = event.extendedProps.descricao || "";
 
-                    // Exibe modal principal
                     new bootstrap.Modal(document.querySelector(".modal")).show();
                 },
                 height: "auto",
@@ -177,7 +159,6 @@
                     id: evt.id,
                     title: evt.nomeEvento,
                     start: evt.dataInicial,
-                    allday: true,
                     end: dataFinal.toISOString().split("T")[0],
                     color: evt.eventColor || "#3788d8",
                     extendedProps: {
@@ -228,12 +209,12 @@
             tbody.innerHTML = "";
             eventos.forEach(evt => {
                 tbody.innerHTML += `<tr>
-          <td>${evt.id}</td>
-          <td>${evt.nomeEvento}</td>
-          <td>${evt.dataInicial}</td>
-          <td>${evt.dataFinal}</td>
-          <td style="background:${evt.eventColor}">${evt.eventColor}</td>
-        </tr>`;
+                    <td>${evt.id}</td>
+                    <td>${evt.nomeEvento}</td>
+                    <td>${evt.dataInicial}</td>
+                    <td>${evt.dataFinal}</td>
+                    <td style="background:${evt.eventColor}">${evt.eventColor}</td>
+                </tr>`;
             });
         }
 
@@ -274,7 +255,7 @@
                     dataInicial,
                     dataFinal,
                     descricao,
-                    eventColor
+                    eventColor: corEvento
                 }),
             });
 
@@ -285,7 +266,6 @@
                 alert("Erro ao atualizar evento.");
             }
         });
-
     </script>
 </body>
 
