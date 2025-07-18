@@ -26,7 +26,7 @@ body {
             background-color: rgba(5, 65, 97, 1);
             padding: 15px;
             border-radius: 15px;
-            width: 30%;
+            width: 40%;
             color: white;
             margin-top: 20px;
         }
@@ -101,3 +101,59 @@ body {
         #submit:hover {
             background-image: #054161;
         }
+
+@media (max-width: 768px) {
+    .box {
+        width: 70%; /* Aumenta a largura da caixa em tablets */
+        padding: 25px; /* Ajusta o padding */
+    }
+
+    fieldset {
+        padding: 15px;
+    }
+
+    .inputUser  {
+        font-size: 16px; /* Aumenta o tamanho da fonte dos inputs */
+    }
+
+    #submit {
+        padding: 15px; /* Aumenta o padding do botão */
+        font-size: 16px; /* Aumenta o tamanho da fonte do botão */
+    }
+}
+
+@media (max-width: 480px) {
+    .box {
+        width: 90%; /* Aumenta a largura da caixa em celulares */
+        padding: 20px; /* Ajusta o padding */
+        margin-top: 10px; /* Ajusta a margem superior */
+    }
+
+    fieldset {
+        padding: 10px;
+    }
+
+    .inputBox {
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    .inputUser  {
+        font-size: 15px; /* Aumenta o tamanho da fonte dos inputs */
+    }
+
+    .labelInput {
+        font-size: 12px; /* Aumenta o tamanho da fonte do label */
+    }
+
+    .input:User focus~.labelInput,
+    .input:User valid~.labelInput {
+        top: -18px; /* Ajusta a posição do label */
+        font-size: 11px; /* Aumenta o tamanho do label ao focar */
+    }
+
+    #submit {
+        padding: 12px; /* Aumenta o padding do botão */
+        font-size: 15px; /* Aumenta o tamanho da fonte do botão */
+    }
+}

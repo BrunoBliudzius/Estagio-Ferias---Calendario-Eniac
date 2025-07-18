@@ -16,14 +16,29 @@
       var calendar = new FullCalendar.Calendar(calendarEl, {
         eventClick: function (info) {
           const modalTitle = document.querySelector(".modal-title");
-          const modalBody = document.querySelector(".modal-body p");
+          const eventDatesParagraph = document.getElementById("eventDates"); // Parágrafo para datas
+          const eventDescriptionParagraph = document.getElementById("eventDescription"); // Parágrafo para descrição
+          const event = info.event; // Objeto de evento do FullCalendar
 
-          modalTitle.textContent = info.event.title;
-          modalBody.textContent = `Data: ${info.event.start.toLocaleDateString()}`;
+          modalTitle.textContent = event.title;
 
-          const bootstrapModal = new bootstrap.Modal(
-            document.querySelector(".modal")
-          );
+          // Formatar as datas para exibição
+          const dataInicialFormatada = event.start ? event.start.toLocaleDateString('pt-BR') : 'N/A';
+          const dataFinalFormatada = event.end ? new Date(event.end.getTime() - 86400000).toLocaleDateString('pt-BR') : 'N/A';
+
+          // Preenche o primeiro parágrafo com as datas
+          eventDatesParagraph.innerHTML = `
+            <strong>Data Inicial:</strong> ${dataInicialFormatada}<br><br>
+            <strong>Data Final:</strong> ${dataFinalFormatada}<br>
+          `;
+          
+          // Preenche o segundo parágrafo com a descrição
+          if (event.extendedProps.descricao) {
+            eventDescriptionParagraph.innerHTML = `<strong> Descrição:</strong> ${event.extendedProps.descricao}`;
+          } else {
+            eventDescriptionParagraph.innerHTML = `<strong> Descrição:</strong> Nenhuma descrição fornecida.`;
+          }
+          const bootstrapModal = new bootstrap.Modal(document.querySelector(".modal"));
           bootstrapModal.show();
         },
         height: 'auto',
@@ -58,7 +73,10 @@
               title: NovoEvento.nomeEvento,
               start: NovoEvento.dataInicial,
               end: dataFinal.toISOString().split("T")[0],
-              color: NovoEvento.eventColor || "#3788d8" // ✅ COR VINDO DA API
+              color: NovoEvento.eventColor || "#3788d8", 
+              extendedProps: {
+                descricao: NovoEvento.descricao
+              }
             });
           }
         }
@@ -94,8 +112,8 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p></p>
-          <p id="p2"></p>
+          <div><p id="eventDates"></p></div>
+          <div><p id="eventDescription"></p></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">

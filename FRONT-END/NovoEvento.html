@@ -31,10 +31,10 @@
                         <input type="date" id="DataEvento" name="DataEvento" required />
                         <label for="DataEvento2">Data Final:</label>
                         <input type="date" id="DataEvento2" name="DataEvento2" required />
-                        <label for="CorEvento">Cor do Evento:</label>
-                        <input type="color" id="CorEvento" name="CorEvento" value="#3788d8" />
                         <label for="Descricao">Descrição:</label>
                         <textarea id="Descricao" name="Descricao" rows="2"></textarea>
+                        <label for="CorEvento">Cor do Evento:</label>
+                        <input type="color" id="CorEvento" name="CorEvento" value="#3788d8" />
                         <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" />
                         <button id="voltar">
                             <a href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/calendarioUser.html">
@@ -79,24 +79,24 @@
                 <div class="modal-content">
                     <form id="formEditarEvento">
                         <div class="modal-header">
-                            <h5 class="modal-title">Editar Evento</h5>
+                            <h5 class="modal-title"><strong>Editar Evento</strong></h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                 aria-label="Fechar"></button>
                         </div>
                         <div class="modal-body">
-                            <label for="editNomeEvento">Nome:</label>
+                            <label for="editNomeEvento"><strong>Nome:</strong></label>
                             <input type="text" id="editNomeEvento" class="form-control" required />
 
-                            <label for="editDataInicial">Data Inicial:</label>
+                            <label for="editDataInicial"><strong>Data Inicial:</strong></label>
                             <input type="date" id="editDataInicial" class="form-control" required />
 
-                            <label for="editDataFinal">Data Final:</label>
+                            <label for="editDataFinal"><strong>Data Final:</strong></label>
                             <input type="date" id="editDataFinal" class="form-control" required />
 
-                            <label for="editCorEvento">Cor:</label>
+                            <label for="editCorEvento"><strong>Cor:</strong></label>
                             <input type="color" id="editCorEvento" class="form-control" />
 
-                            <label for="editDescricao">Descrição:</label>
+                            <label for="editDescricao"><strong>Descrição:</strong></label>
                             <textarea id="editDescricao" class="form-control" rows="2"></textarea>
                         </div>
                         <div class="modal-footer">

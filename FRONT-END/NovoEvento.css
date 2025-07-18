@@ -55,7 +55,8 @@ label {
 }
 
 input[type="text"],
-input[type="date"] {
+input[type="date"],
+textarea{
   width: 100%;
   padding: 10px;
   border: none;
@@ -131,19 +132,144 @@ input[type="date"] {
 
 #calendar {
   flex: 1; /* o calendário ocupa o resto */
-  max-width: 600px; /* largura desejada */
+  max-width: 90%; /* largura desejada */
+  padding: 15px;
+  margin-right: 20px;
+    background-color: white; /* Exemplo de fundo */
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
 }
 
-#calendar {
-  flex: 1; /* o calendário ocupa o resto */
-  max-width: 600px; /* largura desejada */
+@media (max-width: 992px) { /* Para tablets e telas menores que desktops */
+    .container-flex {
+        flex-direction: column; /* Empilha o formulário e o calendário */
+        align-items: center; /* Centraliza os itens empilhados */
+    }
+
+    .formulario {
+        margin-left: 0 !important; /* Remove a margem esquerda */
+        width: 90%; 
+        max-width: 600px; 
+    }
+
+    #calendar {
+        max-width: 90%; 
+        margin-top: 30px !important; /* Adiciona margem superior */
+    }
+
+    .box2 {
+        width: 90%; 
+        padding: 20px;
+    }
+
+    #tabelaEventos {
+        font-size: 0.9em; /* Reduz o tamanho da fonte da tabela */
+    }
 }
 
-@media (max-width: 768px) {
-  .container-flex {
-    flex-direction: column; /* empilha no mobile */
-  }
-  #calendar {
-    max-width: 100%;
-  }
+@media (max-width: 768px) { /* Para tablets menores e celulares */
+    .divCabecalho {
+        flex-direction: column;
+        height: auto;
+        padding: 10px 0;
+    }
+
+    #eniac {
+        max-height: 70px;
+        padding: 10px;
+    }
+
+    .box {
+        padding: 15px;
+    }
+
+    fieldset {
+        padding: 15px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    #cadastrarEvento,
+    #voltar {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .box2 {
+        padding: 15px;
+    }
+
+    #pesquisa {
+        width: 90%;
+        margin-bottom: 15px;
+    }
+
+    #btnPesquisar {
+        width: 90%;
+    }
+
+    #tabelaEventos th,
+    #tabelaEventos td {
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) { /* Para celulares */
+    #eniac {
+        max-height: 60px;
+    }
+
+    .formulario {
+        width: 95%;
+    }
+
+    #calendar {
+        max-width: 95%;
+    }
+
+    .box {
+        padding: 10px;
+    }
+
+    fieldset {
+        padding: 10px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea {
+        font-size: 13px;
+        padding: 6px;
+    }
+
+    #cadastrarEvento,
+    #voltar {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    .box2 {
+        width: 95%;
+        padding: 10px;
+    }
+
+    #pesquisa,
+    #btnPesquisar {
+        width: 95%;
+    }
+
+    #tabelaEventos {
+        font-size: 0.8em;
+    }
+
+    #tabelaEventos th,
+    #tabelaEventos td {
+        padding: 6px;
+    }
 }
