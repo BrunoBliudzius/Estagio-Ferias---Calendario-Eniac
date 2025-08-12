@@ -13,28 +13,29 @@
 <body>
     <div class="divCabecalho">
         <a href="https://www.eniac.edu.br/">
-            <img src="http://localhost/Estagio-Ferias---Calendario-Eniac/imagens/path32.png" alt="Logo Eniac"
-                id="eniac" />
+            <img src="http://localhost/Estagio-Ferias---Calendario-Eniac/imagens/path32.png" alt="Logo Eniac" id="eniac" />
         </a>
     </div>
 
     <div class="container-flex">
         <div class="formulario ms-5">
             <div class="box">
-                <form id="formEvento">
+                <form id="formEvento" enctype="multipart/form-data">
                     <fieldset>
                         <br />
                         <legend><b>Cadastrar novo Evento</b></legend>
                         <label for="NomeEvento">Nome do Evento</label>
-                        <input type="text" id="NomeEvento" name="NomeEvento" required />
+                        <input type="text" id="NomeEvento" name="nomeEvento" required />
                         <label for="DataEvento">Data Inicial:</label>
-                        <input type="date" id="DataEvento" name="DataEvento" required />
+                        <input type="date" id="DataEvento" name="dataInicial" required />
                         <label for="DataEvento2">Data Final:</label>
-                        <input type="date" id="DataEvento2" name="DataEvento2" required />
+                        <input type="date" id="DataEvento2" name="dataFinal" required />
                         <label for="Descricao">Descrição:</label>
-                        <textarea id="Descricao" name="Descricao" rows="2"></textarea>
+                        <textarea id="Descricao" name="descricao" rows="2"></textarea>
                         <label for="CorEvento">Cor do Evento:</label>
-                        <input type="color" id="CorEvento" name="CorEvento" value="#3788d8" />
+                        <input type="color" id="CorEvento" name="eventColor" value="#3788d8" />
+                        <label for="ImagemEvento">Imagem do Evento:</label>
+                        <input type="file" id="ImagemEvento" name="imagem" accept="image/*" />
                         <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" />
                         <button id="voltar">
                             <a href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/calendarioUser.html">
@@ -131,7 +132,24 @@
                     idEventoSelecionado = event.id;
 
                     document.querySelector(".modal-title").textContent = event.title;
-                    document.querySelector(".modal-body p").textContent = `Data: ${event.start.toLocaleDateString()}`;
+                    document.querySelector(".modal-body p").textContent = `Data: ${event.start.toLocaleDateString()}\nDescrição: ${event.extendedProps.descricao}`;
+
+                    // Mostrar imagem, se houver
+                    if (event.extendedProps.imagem_url) {
+                        if (!document.getElementById("modal-img-evento")) {
+                            const img = document.createElement("img");
+                            img.id = "modal-img-evento";
+                            img.style.maxWidth = "100%";
+                            img.style.marginTop = "10px";
+                            document.querySelector(".modal-body").appendChild(img);
+                        }
+                        document.getElementById("modal-img-evento").src = event.extendedProps.imagem_url;
+                        document.getElementById("modal-img-evento").style.display = "block";
+                    } else {
+                        if (document.getElementById("modal-img-evento")) {
+                            document.getElementById("modal-img-evento").style.display = "none";
+                        }
+                    }
 
                     // Preenche o modal de edição
                     document.getElementById("editNomeEvento").value = event.title;
@@ -162,7 +180,8 @@
                     end: dataFinal.toISOString().split("T")[0],
                     color: evt.eventColor || "#3788d8",
                     extendedProps: {
-                        descricao: evt.descricao || ""
+                        descricao: evt.descricao || "",
+                        imagem_url: evt.imagem_url || null
                     }
                 });
             });
@@ -170,27 +189,18 @@
 
         document.getElementById("formEvento").addEventListener("submit", async (e) => {
             e.preventDefault();
-            const NomeEvento = document.getElementById("NomeEvento").value.trim();
-            const DataEvento = document.getElementById("DataEvento").value.trim();
-            const DataEvento2 = document.getElementById("DataEvento2").value.trim();
-            const CorEvento = document.getElementById("CorEvento").value.trim();
-            const Descricao = document.getElementById("Descricao").value.trim();
 
-            if (NomeEvento.length < 3) {
+            const formData = new FormData(document.getElementById("formEvento"));
+
+            const nomeEvento = formData.get("nomeEvento").trim();
+            if (nomeEvento.length < 3) {
                 alert("O nome do evento deve ter pelo menos 3 caracteres.");
                 return;
             }
 
             const res = await fetch("http://localhost:5000/datas", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    nomeEvento: NomeEvento,
-                    dataInicial: DataEvento,
-                    dataFinal: DataEvento2,
-                    descricao: Descricao,
-                    eventColor: CorEvento
-                }),
+                body: formData
             });
 
             if (res.ok || res.status === 201) {

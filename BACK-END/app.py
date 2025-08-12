@@ -1,153 +1,122 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pymysql
+import os
+from werkzeug.utils import secure_filename
+import uuid
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-def get_db_connection():
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def db():
     return pymysql.connect(
         host='localhost',
-        user='root',
+                user='root',
         password='',
         db='calendarioeniac',
         cursorclass=pymysql.cursors.DictCursor
     )
 
-# GET - Obter todos os eventos
+def formatar_evento(row):
+    return {
+        'id': row['id'],
+        'nomeEvento': row['nomeEvento'],
+        'dataInicial': row['dataInicial'],
+        'dataFinal': row['dataFinal'],
+        'descricao': row['descricao'],
+        'eventColor': row['eventColor'],
+        'imagem_url': row.get('imagem_url')
+    }
+
 @app.route('/datas', methods=['GET'])
-def obter_eventos():
-    conexao = get_db_connection()
-    cursor = conexao.cursor()
-    try:
-        cursor.execute('SELECT * FROM dados')
-        rows = cursor.fetchall()
-        eventos = []
-        for row in rows:
-            eventos.append({
-                'id': row['id'],
-                'nomeEvento': row['nomeEvento'],
-                'dataInicial': row['dataInicial'],
-                'dataFinal': row['dataFinal'],
-                'descricao': row['descricao'],
-                'eventColor': row['eventColor']
-            })
-        return jsonify(eventos)
-    finally:
-        cursor.close()
-        conexao.close()
+def listar_eventos():
+    with db() as conexao:
+        with conexao.cursor() as cursor:
+            cursor.execute("SELECT * FROM dados")
+            eventos = [formatar_evento(row) for row in cursor.fetchall()]
+    return jsonify(eventos)
 
-# POST - Cadastrar novo evento
 @app.route('/datas', methods=['POST'])
-def add_evento():
-    novo_evento = request.get_json()
-    nomeEvento = novo_evento.get('nomeEvento')
-    dataInicial = novo_evento.get('dataInicial')
-    dataFinal = novo_evento.get('dataFinal')
-    descricao = novo_evento.get('descricao', '')
-    eventColor = novo_evento.get('eventColor', '#3788d8')
-
-    if not nomeEvento or not dataInicial or not dataFinal:
-        return jsonify({'error': 'Faltam campos obrigatórios'}), 400
-
-    conexao = get_db_connection()
-    cursor = conexao.cursor()
-    try:
-        cursor.execute(
-            'INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor) VALUES (%s, %s, %s, %s, %s)',
-            (nomeEvento, dataInicial, dataFinal, descricao, eventColor)
-        )
-        conexao.commit()
-        return jsonify({'message': 'Evento inserido com sucesso'}), 201
-    finally:
-        cursor.close()
-        conexao.close()
-
-# PUT - Atualizar evento existente
-@app.route('/datas/<int:id>', methods=['PUT'])
-def atualizar_evento(id):
-    dados = request.get_json()
-    nomeEvento = dados.get('nomeEvento')
-    dataInicial = dados.get('dataInicial')
-    dataFinal = dados.get('dataFinal')
-    descricao = dados.get('descricao', '')
-    eventColor = dados.get('eventColor')  # <- Agora é usado corretamente
+def criar_evento():
+    nomeEvento = request.form.get('nomeEvento')
+    dataInicial = request.form.get('dataInicial')
+    dataFinal = request.form.get('dataFinal')
+    descricao = request.form.get('descricao', '')
+    eventColor = request.form.get('eventColor', '#3788d8')
 
     if not nomeEvento or not dataInicial or not dataFinal:
         return jsonify({'erro': 'Campos obrigatórios faltando'}), 400
 
-    conexao = get_db_connection()
-    cursor = conexao.cursor()
-    try:
-        sql = """
-            UPDATE dados
-            SET nomeEvento = %s,
-                dataInicial = %s,
-                dataFinal = %s,
-                descricao = %s,
-                eventColor = %s
-            WHERE id = %s
-        """
-        valores = (nomeEvento, dataInicial, dataFinal, descricao, eventColor, id)
-        cursor.execute(sql, valores)
-        conexao.commit()
+    imagem_url = None
 
-        if cursor.rowcount == 0:
-            return jsonify({'erro': 'Evento não encontrado'}), 404
+    if 'imagem' in request.files:
+        file = request.files['imagem']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            ext = filename.rsplit('.', 1)[1].lower()
+            unique_name = f"{uuid.uuid4()}.{ext}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+            file.save(filepath)
+            imagem_url = f"{UPLOAD_FOLDER}/{unique_name}"
 
-        return jsonify({'mensagem': 'Evento atualizado com sucesso'})
-    finally:
-        cursor.close()
-        conexao.close()
+    with db() as conexao:
+        with conexao.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url))
+            conexao.commit()
+    return jsonify({'mensagem': 'Evento criado com sucesso'}), 201
 
-# DELETE - Excluir evento
+@app.route('/datas/<int:id>', methods=['PUT'])
+def atualizar_evento(id):
+    dados = request.get_json()
+    campos = ['nomeEvento', 'dataInicial', 'dataFinal']
+    if not all(dados.get(campo) for campo in campos):
+        return jsonify({'erro': 'Campos obrigatórios faltando'}), 400
+
+    with db() as conexao:
+        with conexao.cursor() as cursor:
+            cursor.execute("""
+                UPDATE dados
+                SET nomeEvento = %s, dataInicial = %s, dataFinal = %s, descricao = %s, eventColor = %s
+                WHERE id = %s
+            """, (dados['nomeEvento'], dados['dataInicial'], dados['dataFinal'], dados.get('descricao', ''), dados.get('eventColor'), id))
+            conexao.commit()
+            if cursor.rowcount == 0:
+                return jsonify({'erro': 'Evento não encontrado'}), 404
+    return jsonify({'mensagem': 'Evento atualizado com sucesso'})
+
 @app.route('/datas/<int:id>', methods=['DELETE'])
 def deletar_evento(id):
-    conexao = get_db_connection()
-    cursor = conexao.cursor()
-    try:
-        sql = "DELETE FROM dados WHERE id = %s"
-        cursor.execute(sql, (id,))
-        conexao.commit()
+    with db() as conexao:
+        with conexao.cursor() as cursor:
+            cursor.execute("DELETE FROM dados WHERE id = %s", (id,))
+            conexao.commit()
+            if cursor.rowcount == 0:
+                return jsonify({'erro': 'Evento não encontrado'}), 404
+    return jsonify({'mensagem': 'Evento excluído com sucesso'})
 
-        if cursor.rowcount == 0:
-            return jsonify({'erro': 'Evento não encontrado'}), 404
-
-        return jsonify({'mensagem': 'Evento excluído com sucesso'})
-    finally:
-        cursor.close()
-        conexao.close()
-
-# GET - Filtro por nome do evento
 @app.route('/datasFiltro', methods=['GET'])
-def obter_evento_por_nome():
-    nome_evento = request.args.get('nomeEvento')
-    if not nome_evento:
+def buscar_evento_por_nome():
+    nome = request.args.get('nomeEvento')
+    if not nome:
         return jsonify({'erro': 'Parâmetro nomeEvento é obrigatório'}), 400
 
-    conexao = get_db_connection()
-    cursor = conexao.cursor()
-    try:
-        sql = "SELECT * FROM dados WHERE nomeEvento LIKE %s"
-        cursor.execute(sql, ('%' + nome_evento + '%',))
-        rows = cursor.fetchall()
+    with db() as conexao:
+        with conexao.cursor() as cursor:
+            cursor.execute("SELECT * FROM dados WHERE nomeEvento LIKE %s", ('%' + nome + '%',))
+            eventos = [formatar_evento(row) for row in cursor.fetchall()]
+    return jsonify(eventos)
 
-        eventos = []
-        for row in rows:
-            eventos.append({
-                'id': row['id'],
-                'nomeEvento': row['nomeEvento'],
-                'dataInicial': row['dataInicial'],
-                'dataFinal': row['dataFinal'],
-                'descricao': row['descricao'],
-                'eventColor': row['eventColor']  # incluir cor aqui também
-            })
-
-        return jsonify(eventos)
-    finally:
-        cursor.close()
-        conexao.close()
-
-# Roda o servidor
 if __name__ == '__main__':
-    app.run(port=5000, host='localhost', debug=True)
+    app.run(host='localhost', port=5000, debug=True)
