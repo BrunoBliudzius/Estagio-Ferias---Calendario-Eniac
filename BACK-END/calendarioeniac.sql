@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 17/07/2025 às 22:21
+-- Tempo de geração: 12/08/2025 às 21:06
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -33,15 +33,16 @@ CREATE TABLE `dados` (
   `dataInicial` varchar(255) DEFAULT NULL,
   `dataFinal` varchar(255) NOT NULL,
   `descricao` text DEFAULT NULL,
-  `eventColor` varchar(7) DEFAULT '#054161'
+  `eventColor` varchar(7) DEFAULT '#054161',
+  `imagem_url` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Despejando dados para a tabela `dados`
 --
 
-INSERT INTO `dados` (`id`, `nomeEvento`, `dataInicial`, `dataFinal`, `descricao`, `eventColor`) VALUES
-(11, 'AULA DO CAL', '2025-07-08', '2025-07-24', '', '#f51bb9');
+INSERT INTO `dados` (`id`, `nomeEvento`, `dataInicial`, `dataFinal`, `descricao`, `eventColor`, `imagem_url`) VALUES
+(1, 'teste1', '2025-08-01', '2025-08-02', 'teste de upload', '#d737ba', 'uploads/3b57b625-734c-4f01-a236-8b905e8a450c.png');
 
 --
 -- Índices para tabelas despejadas
@@ -61,7 +62,7 @@ ALTER TABLE `dados`
 -- AUTO_INCREMENT de tabela `dados`
 --
 ALTER TABLE `dados`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
