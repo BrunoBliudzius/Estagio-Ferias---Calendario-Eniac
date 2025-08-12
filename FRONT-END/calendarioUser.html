@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8" />
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.js"></script>
@@ -9,79 +10,67 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      let url = "http://localhost:5000/datas";
-      var calendarEl = document.getElementById("calendar");
-
-      var calendar = new FullCalendar.Calendar(calendarEl, {
+    document.addEventListener("DOMContentLoaded", async function () {
+      let calendarEl = document.getElementById("calendar");
+      let calendar = new FullCalendar.Calendar(calendarEl, {
         eventClick: function (info) {
-          const modalTitle = document.querySelector(".modal-title");
-          const eventDatesParagraph = document.getElementById("eventDates"); // Parágrafo para datas
-          const eventDescriptionParagraph = document.getElementById("eventDescription"); // Parágrafo para descrição
-          const event = info.event; // Objeto de evento do FullCalendar
+          const event = info.event;
+          idEventoSelecionado = event.id;
 
-          modalTitle.textContent = event.title;
+          document.querySelector(".modal-title").textContent = event.title;
+          document.querySelector(".modal-body p").textContent = `Data: ${event.start.toLocaleDateString()}\nDescrição: ${event.extendedProps.descricao}`;
 
-          // Formatar as datas para exibição
-          const dataInicialFormatada = event.start ? event.start.toLocaleDateString('pt-BR') : 'N/A';
-          const dataFinalFormatada = event.end ? new Date(event.end.getTime() - 86400000).toLocaleDateString('pt-BR') : 'N/A';
-
-          // Preenche o primeiro parágrafo com as datas
-          eventDatesParagraph.innerHTML = `
-            <strong>Data Inicial:</strong> ${dataInicialFormatada}<br><br>
-            <strong>Data Final:</strong> ${dataFinalFormatada}<br>
-          `;
-          
-          // Preenche o segundo parágrafo com a descrição
-          if (event.extendedProps.descricao) {
-            eventDescriptionParagraph.innerHTML = `<strong> Descrição:</strong> ${event.extendedProps.descricao}`;
+          // Mostrar imagem, se houver
+          if (event.extendedProps.imagem_url) {
+            if (!document.getElementById("modal-img-evento")) {
+              const img = document.createElement("img");
+              img.id = "modal-img-evento";
+              img.style.maxWidth = "100%";
+              img.style.marginTop = "10px";
+              document.querySelector(".modal-body").appendChild(img);
+            }
+            document.getElementById("modal-img-evento").src = event.extendedProps.imagem_url;
+            document.getElementById("modal-img-evento").style.display = "block";
           } else {
-            eventDescriptionParagraph.innerHTML = `<strong> Descrição:</strong> Nenhuma descrição fornecida.`;
+            if (document.getElementById("modal-img-evento")) {
+              document.getElementById("modal-img-evento").style.display = "none";
+            }
           }
-          const bootstrapModal = new bootstrap.Modal(document.querySelector(".modal"));
-          bootstrapModal.show();
+
+          // Preenche o modal de edição
+          document.getElementById("editNomeEvento").value = event.title;
+          document.getElementById("editDataInicial").value = event.startStr;
+          document.getElementById("editDataFinal").value = event.endStr
+            ? new Date(new Date(event.endStr).setDate(new Date(event.endStr).getDate() - 1)).toISOString().split("T")[0]
+            : event.startStr;
+          document.getElementById("editCorEvento").value = event.backgroundColor || "#3788d8";
+          document.getElementById("editDescricao").value = event.extendedProps.descricao || "";
+
+          new bootstrap.Modal(document.querySelector(".modal")).show();
         },
-        height: 'auto',
-        selectable: true,
-        views: {
-          dayGridMonth: {
-            titleFormat: {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            },
-          },
-        },
+        height: "auto",
         initialView: "dayGridMonth",
         locale: "pt-br",
       });
-
       calendar.render();
 
-      let obj = new XMLHttpRequest();
-      obj.open("GET", url, true);
-      obj.onreadystatechange = function () {
-        if (obj.readyState == 4 && obj.status == 200) {
-          var resposta = JSON.parse(obj.responseText);
-          console.log(resposta);
-          for (let NovoEvento of resposta) {
-            let dataFinal = new Date(NovoEvento.dataFinal);
-            dataFinal.setDate(dataFinal.getDate() + 1);
-
-            calendar.addEvent({
-              id: NovoEvento.id,
-              title: NovoEvento.nomeEvento,
-              start: NovoEvento.dataInicial,
-              end: dataFinal.toISOString().split("T")[0],
-              color: NovoEvento.eventColor || "#3788d8", 
-              extendedProps: {
-                descricao: NovoEvento.descricao
-              }
-            });
+      const res = await fetch("http://localhost:5000/datas");
+      const eventos = await res.json();
+      eventos.forEach(evt => {
+        let dataFinal = new Date(evt.dataFinal);
+        dataFinal.setDate(dataFinal.getDate() + 1);
+        calendar.addEvent({
+          id: evt.id,
+          title: evt.nomeEvento,
+          start: evt.dataInicial,
+          end: dataFinal.toISOString().split("T")[0],
+          color: evt.eventColor || "#3788d8",
+          extendedProps: {
+            descricao: evt.descricao || "",
+            imagem_url: evt.imagem_url || null
           }
-        }
-      }
-      obj.send();
+        });
+      });
     });
   </script>
 </head>
@@ -101,27 +90,59 @@
       </a>
     </div>
   </div>
+  <div class="container-flex">
+    <div id="calendar" class="mt-4"></div>
 
-  <div id="calendar"></div>
-
-  <div class="modal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title"></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div><p id="eventDates"></p></div>
-          <div><p id="eventDescription"></p></div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-            Fechar
-          </button>
+    <div class="modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <p></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+
+    <div class="modal fade" id="modalEditarEvento" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="formEditarEvento">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><strong>Editar Evento</strong></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Fechar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label for="editNomeEvento"><strong>Nome:</strong></label>
+                            <input type="text" id="editNomeEvento" class="form-control" required />
+
+                            <label for="editDataInicial"><strong>Data Inicial:</strong></label>
+                            <input type="date" id="editDataInicial" class="form-control" required />
+
+                            <label for="editDataFinal"><strong>Data Final:</strong></label>
+                            <input type="date" id="editDataFinal" class="form-control" required />
+
+                            <label for="editCorEvento"><strong>Cor:</strong></label>
+                            <input type="color" id="editCorEvento" class="form-control" />
+
+                            <label for="editDescricao"><strong>Descrição:</strong></label>
+                            <textarea id="editDescricao" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Salvar Alterações</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 </body>
+
 </html>
