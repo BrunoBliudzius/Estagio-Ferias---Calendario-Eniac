@@ -5,7 +5,7 @@ from flask_cors import CORS
 import pymysql
 
 # Configuração do Flask
-app = Flask(__name__, template_folder=r"C:\xampp\htdocs\Estagio-Ferias---Calendario-Eniac\FRONT-END")
+app = Flask(__name__)
 
 # Chave secreta obrigatória para sessões
 app.secret_key = os.urandom(24)  # pode trocar por uma fixa se quiser manter entre reinícios
@@ -38,6 +38,7 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
+# Rota para login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -53,24 +54,19 @@ def login():
         if user:
             session['usuario_id'] = user['id']
             session['usuario_nome'] = user['usuario']
-            return redirect('/novo-evento')  # Redireciona para novo evento
+            return redirect(url_for('novo_evento_page'))  # Redireciona para a rota correta
         else:
             return "Usuário ou senha inválidos", 401
 
-    # GET: Serve o login
-    return send_from_directory(
-        r"C:\xampp\htdocs\Estagio-Ferias---Calendario-Eniac\FRONT-END",
-        "login.html"
-    )
+    # GET: Serve a página de login
+    return render_template("login.html")
+
 @app.route('/novo-evento')
 def novo_evento_page():
     if 'usuario_id' not in session:
-        return redirect('/login')  # Redireciona para o login se não estiver logado
-    # Serve a página HTML
-    return send_from_directory(
-        r"C:\xampp\htdocs\Estagio-Ferias---Calendario-Eniac\FRONT-END",
-        "NovoEvento.html"
-    )
+        return redirect('/login')
+    return render_template("NovoEvento.html", usuario_nome=session['usuario_nome'])
+
 
 @app.route('/logout')
 def logout():
