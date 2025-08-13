@@ -114,7 +114,7 @@ def atualizar_evento(event_id):
     imagem_url = evento.get('imagem_url')
 
     # Upload de nova imagem
-    if 'imagem' in request.files:
+    if 'imagem' in request.files and request.files['imagem'].filename != '':
         file = request.files['imagem']
         if file and allowed_file(file.filename):
             ext = file.filename.rsplit('.', 1)[1].lower()

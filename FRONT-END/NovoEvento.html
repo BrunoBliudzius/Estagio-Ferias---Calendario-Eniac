@@ -95,6 +95,9 @@
 
                             <label for="editDescricao"><strong>Descrição:</strong></label>
                             <textarea id="editDescricao" class="form-control" rows="2"></textarea>
+
+                            <label for="editImagemEvento"><strong>Imagem do Evento:</strong></label>
+                            <input type="file" id="editImagemEvento" class="form-control" name="imagem" accept="image/*" />
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-success">Salvar Alterações</button>
@@ -162,6 +165,18 @@
                         : event.startStr;
                     document.getElementById("editCorEvento").value = event.backgroundColor || "#3788d8";
                     document.getElementById("editDescricao").value = event.extendedProps.descricao || "";
+
+                    // Mostra prévia da imagem atual no modal de edição
+                    const imgContainer = document.getElementById("editImagemEvento").parentElement;
+                    let imgPreview = document.getElementById("editImagemPreview");                       
+                    if (!imgPreview) {
+                        imgPreview = document.createElement("img");
+                        imgPreview.id = "editImagemPreview";
+                        imgPreview.style.maxWidth = "100%";
+                        imgPreview.style.marginTop = "10px";
+                        imgContainer.appendChild(imgPreview);
+                    }
+                    imgPreview.src = event.extendedProps.imagem_url || "";
 
                     new bootstrap.Modal(document.querySelector(".modal")).show();
                 },
@@ -254,22 +269,22 @@
 
         document.getElementById("formEditarEvento").addEventListener("submit", async function (e) {
             e.preventDefault();
-            const nomeEvento = document.getElementById("editNomeEvento").value.trim();
-            const dataInicial = document.getElementById("editDataInicial").value;
-            const dataFinal = document.getElementById("editDataFinal").value;
-            const corEvento = document.getElementById("editCorEvento").value;
-            const descricao = document.getElementById("editDescricao").value.trim();
+
+            const formData = new FormData();
+            formData.append("nomeEvento", document.getElementById("editNomeEvento").value.trim());
+            formData.append("dataInicial", document.getElementById("editDataInicial").value);
+            formData.append("dataFinal", document.getElementById("editDataFinal").value);
+            formData.append("descricao", document.getElementById("editDescricao").value.trim());
+            formData.append("eventColor", document.getElementById("editCorEvento").value);
+
+            const imagemFile = document.getElementById("editImagemEvento").files[0];
+            if (imagemFile) {
+                formData.append("imagem", imagemFile);
+            }
 
             const res = await fetch(`http://localhost:5000/datas/${idEventoSelecionado}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    nomeEvento,
-                    dataInicial,
-                    dataFinal,
-                    descricao,
-                    eventColor: corEvento
-                }),
+                body: formData
             });
 
             if (res.ok) {
