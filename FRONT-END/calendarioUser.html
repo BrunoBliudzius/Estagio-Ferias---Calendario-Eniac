@@ -18,7 +18,8 @@
           idEventoSelecionado = event.id;
 
           document.querySelector(".modal-title").textContent = event.title;
-          document.querySelector(".modal-body p").textContent = `Data: ${event.start.toLocaleDateString()}\nDescrição: ${event.extendedProps.descricao}`;
+          document.querySelector(".modal-body p").innerHTML =
+  `<strong>Data:</strong> ${event.start.toLocaleDateString()}<br><strong>Descrição:</strong> ${event.extendedProps.descricao}`;
 
           // Mostrar imagem, se houver
           if (event.extendedProps.imagem_url) {
@@ -80,7 +81,7 @@
     <div class="esquerda">
       <button id="evento">
         <a href="http://localhost/Estagio-Ferias---Calendario-Eniac/FRONT-END/login.html">
-          Adcionar Evento
+          Adicionar Evento
         </a>
       </button>
     </div>
