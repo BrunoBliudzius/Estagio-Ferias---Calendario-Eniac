@@ -1,12 +1,20 @@
 import os
 import uuid
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template,redirect, url_for, session
 from flask_cors import CORS
 import pymysql
 
 # Configuração do Flask
-app = Flask(__name__)
-CORS(app)
+app = Flask(__name__, template_folder=r"C:\xampp\htdocs\Estagio-Ferias---Calendario-Eniac\FRONT-END")
+
+# Chave secreta obrigatória para sessões
+app.secret_key = os.urandom(24)  # pode trocar por uma fixa se quiser manter entre reinícios
+
+# Configurar sessão para expirar depois de um tempo (opcional)
+app.permanent_session_lifetime = 3600  # em segundos (1 hora)
+
+# CORS com suporte a cookies
+CORS(app, supports_credentials=True)
 
 # Pasta onde as imagens serão salvas
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
@@ -29,6 +37,45 @@ def get_db_connection():
         database="calendarioeniac",
         cursorclass=pymysql.cursors.DictCursor
     )
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        usuario = request.form['nome']
+        senha = request.form['senha']
+
+        conexao = get_db_connection()
+        with conexao.cursor() as cursor:
+            cursor.execute("SELECT * FROM usuarios WHERE usuario=%s AND senha=%s", (usuario, senha))
+            user = cursor.fetchone()
+        conexao.close()
+
+        if user:
+            session['usuario_id'] = user['id']
+            session['usuario_nome'] = user['usuario']
+            return redirect('/novo-evento')  # Redireciona para novo evento
+        else:
+            return "Usuário ou senha inválidos", 401
+
+    # GET: Serve o login
+    return send_from_directory(
+        r"C:\xampp\htdocs\Estagio-Ferias---Calendario-Eniac\FRONT-END",
+        "login.html"
+    )
+@app.route('/novo-evento')
+def novo_evento_page():
+    if 'usuario_id' not in session:
+        return redirect('/login')  # Redireciona para o login se não estiver logado
+    # Serve a página HTML
+    return send_from_directory(
+        r"C:\xampp\htdocs\Estagio-Ferias---Calendario-Eniac\FRONT-END",
+        "NovoEvento.html"
+    )
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/login')
 
 # Formata evento para o front
 def formatar_evento(row):
