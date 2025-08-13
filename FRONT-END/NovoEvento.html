@@ -319,6 +319,37 @@
         });
       });
 
+      // --- VALIDAÇÃO DE DATAS PARA CRIAÇÃO DE EVENTO ---
+      const dataInicialInput = document.getElementById("DataEvento");
+        const dataFinalInput = document.getElementById("DataEvento2");
+
+        dataInicialInput.addEventListener("change", function () {
+          dataFinalInput.min = this.value;
+          if (dataFinalInput.value < this.value) {
+            dataFinalInput.value = this.value; // Define a data final para a data inicial se for anterior
+          }
+        });
+
+        // --- VALIDAÇÃO DE DATAS PARA EDIÇÃO DE EVENTO ---
+        const editDataInicialInput = document.getElementById("editDataInicial");
+        const editDataFinalInput = document.getElementById("editDataFinal");
+
+        editDataInicialInput.addEventListener("change", function () {
+          editDataFinalInput.min = this.value;
+          if (editDataFinalInput.value < this.value) {
+            editDataFinalInput.value = this.value; // Define a data final para a data inicial se for anterior
+          }
+        });
+
+        // Garante que a data mínima é definida ao abrir o modal de edição
+        document
+          .getElementById("modalEditarEvento")
+          .addEventListener("show.bs.modal", function () {
+            if (editDataInicialInput.value) {
+              editDataFinalInput.min = editDataInicialInput.value;
+            }
+          });
+
       document
         .getElementById("formEvento")
         .addEventListener("submit", async (e) => {
