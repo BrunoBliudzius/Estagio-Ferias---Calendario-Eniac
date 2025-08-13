@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 12/08/2025 às 21:06
+-- Tempo de geração: 13/08/2025 às 23:18
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -42,7 +42,27 @@ CREATE TABLE `dados` (
 --
 
 INSERT INTO `dados` (`id`, `nomeEvento`, `dataInicial`, `dataFinal`, `descricao`, `eventColor`, `imagem_url`) VALUES
-(1, 'teste1', '2025-08-01', '2025-08-02', 'teste de upload', '#d737ba', 'uploads/3b57b625-734c-4f01-a236-8b905e8a450c.png');
+(1, 'Luta', '2025-08-13', '2025-08-14', 'LUTAS EPICAS', '#008040', '6e8eddab-4cba-4f57-a830-1767c27dfd32.png');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `usuarios`
+--
+
+CREATE TABLE `usuarios` (
+  `id` int(11) NOT NULL,
+  `usuario` varchar(50) NOT NULL,
+  `senha` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `usuarios`
+--
+
+INSERT INTO `usuarios` (`id`, `usuario`, `senha`) VALUES
+(1, 'admin', '123admin'),
+(2, 'bruno', 'admin123');
 
 --
 -- Índices para tabelas despejadas
@@ -55,6 +75,12 @@ ALTER TABLE `dados`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Índices de tabela `usuarios`
+--
+ALTER TABLE `usuarios`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT para tabelas despejadas
 --
 
@@ -63,6 +89,12 @@ ALTER TABLE `dados`
 --
 ALTER TABLE `dados`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de tabela `usuarios`
+--
+ALTER TABLE `usuarios`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
