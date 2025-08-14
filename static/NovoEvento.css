@@ -20,7 +20,7 @@ body {
 
 /* Aumentado tamanho da box, com mais espaço e sombra */
 .box {
-  margin: 50px auto;
+  margin: 0;
   background-color: #054161;
   padding: 10px 10px;
   border-radius: 15px;
@@ -120,19 +120,24 @@ textarea{
 
 .container-flex {
   display: flex;
-  align-items: flex-start; /* alinha no topo */
+  align-items: stretch; /* alinha no topo */
   gap: 20px; /* espaço entre form e calendário */
 }
 
 #formulario {
-  flex: 1;
-  max-width: 500px;
-  height: 10vh;
+  flex: 1; /* Agora o form cresce junto com o calendário */
+    margin: 0 !important;
+    padding: 0;
+}
+
+#formulario fieldset {
+  margin-top: 0; /* remove espaço extra */
+  padding-top: 5px; /* ajusta a altura */
 }
 
 #calendar {
   flex: 1; /* o calendário ocupa o resto */
-  max-width: 90%; /* largura desejada */
+  max-width: 100%; /* largura desejada */
   padding: 15px;
   margin-right: 20px;
     background-color: white; /* Exemplo de fundo */
@@ -148,7 +153,6 @@ textarea{
     }
 
     .formulario {
-        margin-left: 0 !important; /* Remove a margem esquerda */
         width: 90%; 
         max-width: 600px; 
     }
