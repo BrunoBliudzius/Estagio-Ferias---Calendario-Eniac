@@ -53,7 +53,6 @@ def novo_evento_page():
     if 'usuario_id' not in session:
         return redirect('/login')
 
-    # Capitaliza nome (inclui nomes compostos corretamente)
     nome_formatado = session['usuario_nome'].title()
 
     return render_template("NovoEvento.html", usuario_nome=nome_formatado)
@@ -74,7 +73,8 @@ def formatar_evento(row):
         'dataFinal': row['dataFinal'],
         'descricao': row['descricao'],
         'eventColor': row['eventColor'],
-        'imagem_url': imagem_url
+        'imagem_url': imagem_url,
+        'usuario_nome': row.get('usuario')
     }
 
 @app.route('/uploads/<path:filename>')
@@ -85,7 +85,8 @@ def uploaded_file(filename):
 def obter_eventos():
     conexao = get_db_connection()
     cursor = conexao.cursor()
-    cursor.execute('SELECT * FROM dados')
+    # Faz um JOIN para buscar o nome do usuário
+    cursor.execute('SELECT d.*, u.usuario FROM dados d LEFT JOIN usuarios u ON d.usuario_id = u.id')
     rows = cursor.fetchall()
     conexao.close()
     eventos = [formatar_evento(row) for row in rows]
@@ -97,7 +98,8 @@ def filtrar_eventos():
 
     conexao = get_db_connection()
     cursor = conexao.cursor()
-    cursor.execute("SELECT * FROM dados WHERE nomeEvento LIKE %s", (f"%{nome_evento}%",))
+    # Faz um JOIN para buscar o nome do usuário no filtro
+    cursor.execute("SELECT d.*, u.usuario FROM dados d LEFT JOIN usuarios u ON d.usuario_id = u.id WHERE d.nomeEvento LIKE %s", (f"%{nome_evento}%",))
     rows = cursor.fetchall()
     conexao.close()
 
@@ -106,6 +108,10 @@ def filtrar_eventos():
 
 @app.route('/datas', methods=['POST'])
 def criar_evento():
+    if 'usuario_id' not in session:
+        return jsonify({'erro': 'Não autorizado'}), 401
+
+    usuario_id = session['usuario_id']
     nomeEvento = request.form.get('nomeEvento')
     dataInicial = request.form.get('dataInicial')
     dataFinal = request.form.get('dataFinal')
@@ -125,9 +131,9 @@ def criar_evento():
     conexao = get_db_connection()
     cursor = conexao.cursor()
     cursor.execute("""
-        INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url)
-        VALUES (%s, %s, %s, %s, %s, %s)
-    """, (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url))
+        INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """, (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id))
     conexao.commit()
     conexao.close()
 
@@ -135,6 +141,10 @@ def criar_evento():
 
 @app.route('/datas/<int:event_id>', methods=['PUT'])
 def atualizar_evento(event_id):
+    if 'usuario_id' not in session:
+        return jsonify({'erro': 'Não autorizado'}), 401
+        
+    usuario_id = session['usuario_id']
     nomeEvento = request.form.get('nomeEvento')
     dataInicial = request.form.get('dataInicial')
     dataFinal = request.form.get('dataFinal')
@@ -161,9 +171,9 @@ def atualizar_evento(event_id):
 
     cursor.execute("""
         UPDATE dados
-        SET nomeEvento = %s, dataInicial = %s, dataFinal = %s, descricao = %s, eventColor = %s, imagem_url = %s
+        SET nomeEvento = %s, dataInicial = %s, dataFinal = %s, descricao = %s, eventColor = %s, imagem_url = %s, usuario_id = %s
         WHERE id = %s
-    """, (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, event_id))
+    """, (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id, event_id))
     conexao.commit()
     conexao.close()
 

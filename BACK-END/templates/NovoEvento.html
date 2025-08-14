@@ -17,9 +17,9 @@
       <img src="http://localhost/Estagio-Ferias---Calendario-Eniac/imagens/path32.png" alt="Logo Eniac" id="eniac" />
     </a>
   </div>
-
+  <br>
   <h2 style="text-align: center;">Bem-vindo, {{ usuario_nome}}!</h2>
-
+  <br>
   <div class="container-flex">
     <div class="formulario ms-5">
       <div class="box">
@@ -61,6 +61,7 @@
           </div>
           <div class="modal-body">
             <p></p>
+            <p id="modal-usuario" class="mt-2"></p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-danger" onclick="FuncaoDeletar()">
@@ -77,7 +78,6 @@
       </div>
     </div>
 
-    <!-- Modal de Edição -->
     <div class="modal fade" id="modalEditarEvento" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">

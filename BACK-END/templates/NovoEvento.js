@@ -1,6 +1,6 @@
 let idEventoSelecionado = null;
-let calendar;        // vamos precisar dele fora para o gotoDate
-let monthInput = null; // referência do input no header
+let calendar;
+let monthInput = null;
 
 document.addEventListener("DOMContentLoaded", async function () {
     let calendarEl = document.getElementById("calendar");
@@ -11,10 +11,17 @@ document.addEventListener("DOMContentLoaded", async function () {
             idEventoSelecionado = event.id;
 
             document.querySelector(".modal-title").textContent = event.title;
-            document.querySelector(".modal-body p").innerHTML =
+            document.querySelector(".modal-body p:first-of-type").innerHTML =
                 `<strong>Data:</strong> ${event.start.toLocaleDateString()}<br><strong>Descrição:</strong> ${event.extendedProps.descricao}`;
 
-            // Mostrar imagem, se houver
+            // Exibe o nome do usuário que alterou o evento
+            const usuarioEl = document.getElementById("modal-usuario");
+            if (event.extendedProps.usuario_nome) {
+                usuarioEl.innerHTML = `<strong>Última alteração por:</strong> ${event.extendedProps.usuario_nome}`;
+            } else {
+                usuarioEl.innerHTML = "";
+            }
+
             if (event.extendedProps.imagem_url) {
                 if (!document.getElementById("modal-img-evento")) {
                     const img = document.createElement("img");
@@ -31,7 +38,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                 }
             }
 
-            // Preenche o modal de edição
             document.getElementById("editNomeEvento").value = event.title;
             document.getElementById("editDataInicial").value = event.startStr;
             document.getElementById("editDataFinal").value = event.endStr
@@ -40,7 +46,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             document.getElementById("editCorEvento").value = event.backgroundColor || "#3788d8";
             document.getElementById("editDescricao").value = event.extendedProps.descricao || "";
 
-            // Prévia da imagem no modal de edição
             const imgContainer = document.getElementById("editImagemEvento").parentElement;
             let imgPreview = document.getElementById("editImagemPreview");
             if (!imgPreview) {
@@ -58,7 +63,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         initialView: "dayGridMonth",
         locale: "pt-br",
 
-        // mantém o input sincronizado quando navega pelas setas/hoje
         datesSet: function () {
             if (!monthInput) return;
             const d = calendar.getDate();
@@ -69,8 +73,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     calendar.render();
 
-    // --------- [ADICIONADO] GotoDate no header do FullCalendar ----------
-    // cria o input e o botão
     const wrapper = document.createElement("div");
     wrapper.className = "d-inline-flex align-items-center ms-2";
 
@@ -84,11 +86,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     btnIr.className = "btn btn-primary btn-sm ms-2";
     btnIr.textContent = "Ir para a data selecionada";
 
-    // define valor inicial (mês atual do calendário)
     const cur = calendar.getDate();
     monthInput.value = cur.getFullYear() + "-" + String(cur.getMonth() + 1).padStart(2, "0");
 
-    // handlers
     function gotoMonth() {
         if (monthInput.value) {
             calendar.gotoDate(monthInput.value + "-01");
@@ -97,16 +97,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     monthInput.addEventListener("change", gotoMonth);
     btnIr.addEventListener("click", gotoMonth);
 
-    // insere no último chunk do toolbar (onde ficam today/prev/next)
     const rightChunk =
         calendarEl.querySelector(".fc-header-toolbar .fc-toolbar-chunk:last-child") ||
         calendarEl.querySelector(".fc-header-toolbar .fc-toolbar-chunk");
     wrapper.appendChild(monthInput);
     wrapper.appendChild(btnIr);
     if (rightChunk) rightChunk.appendChild(wrapper);
-    // --------------------------------------------------------------------
 
-    // Carrega eventos
     const res = await fetch("http://localhost:5000/datas");
     const eventos = await res.json();
     eventos.forEach((evt) => {
@@ -121,12 +118,12 @@ document.addEventListener("DOMContentLoaded", async function () {
             extendedProps: {
                 descricao: evt.descricao || "",
                 imagem_url: evt.imagem_url || null,
+                usuario_nome: evt.usuario_nome || null,
             },
         });
     });
 });
 
-// --- VALIDAÇÃO DE DATAS PARA CRIAÇÃO DE EVENTO ---
 const dataInicialInput = document.getElementById("DataEvento");
 const dataFinalInput = document.getElementById("DataEvento2");
 
@@ -137,7 +134,6 @@ dataInicialInput.addEventListener("change", function () {
     }
 });
 
-// --- VALIDAÇÃO DE DATAS PARA EDIÇÃO DE EVENTO ---
 const editDataInicialInput = document.getElementById("editDataInicial");
 const editDataFinalInput = document.getElementById("editDataFinal");
 

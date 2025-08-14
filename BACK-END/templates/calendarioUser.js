@@ -7,8 +7,16 @@ document.addEventListener("DOMContentLoaded", async function () {
             idEventoSelecionado = event.id;
 
             document.querySelector(".modal-title").textContent = event.title;
-            document.querySelector(".modal-body p").innerHTML =
+            document.querySelector(".modal-body p:first-of-type").innerHTML =
                 `<strong>Data:</strong> ${event.start.toLocaleDateString()}<br><strong>Descrição:</strong> ${event.extendedProps.descricao}`;
+
+            // Exibe o nome do usuário que alterou o evento
+            const usuarioEl = document.getElementById("modal-usuario");
+            if (event.extendedProps.usuario_nome) {
+                usuarioEl.innerHTML = `<strong>Última alteração por:</strong> ${event.extendedProps.usuario_nome}`;
+            } else {
+                usuarioEl.innerHTML = "";
+            }
 
             if (event.extendedProps.imagem_url) {
                 if (!document.getElementById("modal-img-evento")) {
@@ -42,7 +50,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         headerToolbar: {
             left: "prev,next today",
             center: "title",
-            right: "customMonthPicker" // espaço para nosso seletor
+            right: "customMonthPicker"
         },
         customButtons: {
             customMonthPicker: {
@@ -56,7 +64,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     calendar.render();
 
-    // Adiciona o input type=month no lugar do botão customizado
     let monthInput = document.createElement("input");
     monthInput.type = "month";
     monthInput.id = "monthPicker";
@@ -65,17 +72,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     monthInput.style.width = "150px";
     monthInput.style.marginLeft = "10px";
 
-    // Quando escolher o mês, ir para essa data
     monthInput.addEventListener("change", function () {
         if (this.value) {
             calendar.gotoDate(this.value + "-01");
         }
     });
 
-    // Insere o input no header do calendário
     document.querySelector(".fc-toolbar-chunk:last-child").appendChild(monthInput);
 
-    // Carrega eventos da API
     const res = await fetch("http://localhost:5000/datas");
     const eventos = await res.json();
     eventos.forEach(evt => {
@@ -89,7 +93,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             color: evt.eventColor || "#3788d8",
             extendedProps: {
                 descricao: evt.descricao || "",
-                imagem_url: evt.imagem_url || null
+                imagem_url: evt.imagem_url || null,
+                usuario_nome: evt.usuario_nome || null
             }
         });
     });
