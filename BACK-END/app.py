@@ -52,7 +52,11 @@ def login():
 def novo_evento_page():
     if 'usuario_id' not in session:
         return redirect('/login')
-    return render_template("NovoEvento.html", usuario_nome=session['usuario_nome'])
+
+    # Capitaliza nome (inclui nomes compostos corretamente)
+    nome_formatado = session['usuario_nome'].title()
+
+    return render_template("NovoEvento.html", usuario_nome=nome_formatado)
 
 @app.route('/logout')
 def logout():
@@ -87,7 +91,6 @@ def obter_eventos():
     eventos = [formatar_evento(row) for row in rows]
     return jsonify(eventos)
 
-# 🔹 NOVA ROTA PARA PESQUISA 🔹
 @app.route('/datasFiltro', methods=['GET'])
 def filtrar_eventos():
     nome_evento = request.args.get('nomeEvento', '').strip()
@@ -177,4 +180,3 @@ def deletar_evento(event_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-    

@@ -17,7 +17,7 @@
     </a>
   </div>
 
-  <h2 style="text-align: center;">Bem-vindo, {{ usuario_nome }}!</h2>
+  <h2 style="text-align: center;">Bem-vindo, {{ usuario_nome}}!</h2>
 
   <div class="container-flex">
     <div class="formulario ms-5">
@@ -37,8 +37,8 @@
             <label for="CorEvento">Cor do Evento:</label>
             <input type="color" id="CorEvento" name="eventColor" value="#3788d8" />
             <label for="ImagemEvento">Imagem do Evento:</label>
-            <input type="file" id="ImagemEvento" name="imagem" accept="image/*" />
-            <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" />
+            <input type="file" id="ImagemEvento" name="imagem" accept="image/*"/>
+            <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" style=/>
             <button id="voltar">
               <a href="http://localhost/Estagio-Ferias---Calendario-Eniac/BACK-END/templates/calendarioUser.html">
                 Ir para calendário
@@ -223,7 +223,7 @@
       const btnIr = document.createElement("button");
       btnIr.type = "button";
       btnIr.className = "btn btn-primary btn-sm ms-2";
-      btnIr.textContent = "Ir";
+      btnIr.textContent = "Ir para a data selecionada";
 
       // define valor inicial (mês atual do calendário)
       const cur = calendar.getDate();
