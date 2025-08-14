@@ -1,34 +1,23 @@
 import os
 import uuid
-from flask import Flask, request, jsonify, send_from_directory, render_template,redirect, url_for, session
+from flask import Flask, request, jsonify, send_from_directory, render_template, redirect, url_for, session
 from flask_cors import CORS
 import pymysql
 
-# Configuração do Flask
 app = Flask(__name__)
-
-# Chave secreta obrigatória para sessões
-app.secret_key = os.urandom(24)  # pode trocar por uma fixa se quiser manter entre reinícios
-
-# Configurar sessão para expirar depois de um tempo (opcional)
-app.permanent_session_lifetime = 3600  # em segundos (1 hora)
-
-# CORS com suporte a cookies
+app.secret_key = os.urandom(24)
+app.permanent_session_lifetime = 3600
 CORS(app, supports_credentials=True)
 
-# Pasta onde as imagens serão salvas
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Extensões permitidas
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "bmp", "tiff", "svg", "jfif"}
 
-# Função para verificar se extensão é válida
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Função de conexão com banco
 def get_db_connection():
     return pymysql.connect(
         host="localhost",
@@ -38,7 +27,6 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-# Rota para login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -54,11 +42,10 @@ def login():
         if user:
             session['usuario_id'] = user['id']
             session['usuario_nome'] = user['usuario']
-            return redirect(url_for('novo_evento_page'))  # Redireciona para a rota correta
+            return redirect(url_for('novo_evento_page'))
         else:
             return "Usuário ou senha inválidos", 401
 
-    # GET: Serve a página de login
     return render_template("login.html")
 
 @app.route('/novo-evento')
@@ -67,13 +54,11 @@ def novo_evento_page():
         return redirect('/login')
     return render_template("NovoEvento.html", usuario_nome=session['usuario_nome'])
 
-
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect('/login')
 
-# Formata evento para o front
 def formatar_evento(row):
     imagem_url = row.get('imagem_url')
     if imagem_url:
@@ -88,12 +73,10 @@ def formatar_evento(row):
         'imagem_url': imagem_url
     }
 
-# Rota para servir imagens
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-# Rota GET para listar eventos
 @app.route('/datas', methods=['GET'])
 def obter_eventos():
     conexao = get_db_connection()
@@ -104,7 +87,20 @@ def obter_eventos():
     eventos = [formatar_evento(row) for row in rows]
     return jsonify(eventos)
 
-# Rota POST para criar evento com imagem
+# 🔹 NOVA ROTA PARA PESQUISA 🔹
+@app.route('/datasFiltro', methods=['GET'])
+def filtrar_eventos():
+    nome_evento = request.args.get('nomeEvento', '').strip()
+
+    conexao = get_db_connection()
+    cursor = conexao.cursor()
+    cursor.execute("SELECT * FROM dados WHERE nomeEvento LIKE %s", (f"%{nome_evento}%",))
+    rows = cursor.fetchall()
+    conexao.close()
+
+    eventos = [formatar_evento(row) for row in rows]
+    return jsonify(eventos)
+
 @app.route('/datas', methods=['POST'])
 def criar_evento():
     nomeEvento = request.form.get('nomeEvento')
@@ -113,7 +109,6 @@ def criar_evento():
     descricao = request.form.get('descricao')
     eventColor = request.form.get('eventColor')
 
-    # Upload de imagem
     imagem_url = None
     if 'imagem' in request.files:
         file = request.files['imagem']
@@ -122,7 +117,7 @@ def criar_evento():
             unique_name = f"{uuid.uuid4()}.{ext}"
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
             file.save(filepath)
-            imagem_url = unique_name  # salva só o nome no banco
+            imagem_url = unique_name
 
     conexao = get_db_connection()
     cursor = conexao.cursor()
@@ -135,7 +130,6 @@ def criar_evento():
 
     return jsonify({'mensagem': 'Evento criado com sucesso'}), 201
 
-# Rota PUT para atualizar evento
 @app.route('/datas/<int:event_id>', methods=['PUT'])
 def atualizar_evento(event_id):
     nomeEvento = request.form.get('nomeEvento')
@@ -146,8 +140,6 @@ def atualizar_evento(event_id):
 
     conexao = get_db_connection()
     cursor = conexao.cursor()
-
-    # Verifica se evento existe
     cursor.execute("SELECT * FROM dados WHERE id = %s", (event_id,))
     evento = cursor.fetchone()
     if not evento:
@@ -155,8 +147,6 @@ def atualizar_evento(event_id):
         return jsonify({'erro': 'Evento não encontrado'}), 404
 
     imagem_url = evento.get('imagem_url')
-
-    # Upload de nova imagem
     if 'imagem' in request.files and request.files['imagem'].filename != '':
         file = request.files['imagem']
         if file and allowed_file(file.filename):
@@ -176,7 +166,6 @@ def atualizar_evento(event_id):
 
     return jsonify({'mensagem': 'Evento atualizado com sucesso'})
 
-# Rota DELETE para excluir evento
 @app.route('/datas/<int:event_id>', methods=['DELETE'])
 def deletar_evento(event_id):
     conexao = get_db_connection()
@@ -188,3 +177,4 @@ def deletar_evento(event_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
