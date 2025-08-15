@@ -1,5 +1,10 @@
 document.addEventListener("DOMContentLoaded", async function () {
     let calendarEl = document.getElementById("calendar");
+    
+    // Faz a chamada para a nova rota que verifica o status de administrador
+    const loginRes = await fetch("http://localhost:5000/check-admin-status");
+    const loginStatus = await loginRes.json();
+    const isAdmin = loginStatus.isAdmin; // Usa a propriedade 'isAdmin' da resposta
 
     let calendar = new FullCalendar.Calendar(calendarEl, {
         eventClick: function (info) {
@@ -10,9 +15,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             document.querySelector(".modal-body p:first-of-type").innerHTML =
                 `<strong>Data:</strong> ${event.start.toLocaleDateString()}<br><strong>Descrição:</strong> ${event.extendedProps.descricao}`;
 
-            // Exibe o nome do usuário que alterou o evento
+            // Exibe o nome do usuário que alterou o evento SOMENTE se for admin
             const usuarioEl = document.getElementById("modal-usuario");
-            if (event.extendedProps.usuario_nome) {
+            if (isAdmin && event.extendedProps.usuario_nome) {
                 usuarioEl.innerHTML = `<strong>Última alteração por:</strong> ${event.extendedProps.usuario_nome}`;
             } else {
                 usuarioEl.innerHTML = "";

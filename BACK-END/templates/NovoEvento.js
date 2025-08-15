@@ -81,10 +81,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     monthInput.className = "form-control form-control-sm";
     monthInput.style.width = "170px";
 
-    const btnIr = document.createElement("button");
-    btnIr.type = "button";
-    btnIr.className = "btn btn-primary btn-sm ms-2";
-    btnIr.textContent = "Ir para a data selecionada";
+    // const btnIr = document.createElement("button");
+    // btnIr.type = "button";
+    // btnIr.className = "btn btn-primary btn-sm ms-2";
+    // btnIr.textContent = "Ir para a data selecionada";
 
     const cur = calendar.getDate();
     monthInput.value = cur.getFullYear() + "-" + String(cur.getMonth() + 1).padStart(2, "0");
@@ -95,13 +95,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
     monthInput.addEventListener("change", gotoMonth);
-    btnIr.addEventListener("click", gotoMonth);
+    // btnIr.addEventListener("click", gotoMonth);
 
     const rightChunk =
         calendarEl.querySelector(".fc-header-toolbar .fc-toolbar-chunk:last-child") ||
         calendarEl.querySelector(".fc-header-toolbar .fc-toolbar-chunk");
     wrapper.appendChild(monthInput);
-    wrapper.appendChild(btnIr);
+    // wrapper.appendChild(btnIr);
     if (rightChunk) rightChunk.appendChild(wrapper);
 
     const res = await fetch("http://localhost:5000/datas");

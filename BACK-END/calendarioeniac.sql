@@ -108,3 +108,10 @@ ADD CONSTRAINT `fk_usuario_id`
   REFERENCES `usuarios` (`id`)
   ON DELETE SET NULL
   ON UPDATE CASCADE;
+
+ALTER TABLE `usuarios`
+ADD COLUMN `role` VARCHAR(20) NOT NULL DEFAULT 'user' AFTER `senha`;
+
+UPDATE `usuarios`
+SET `role` = 'admin'
+WHERE `id` = '1';

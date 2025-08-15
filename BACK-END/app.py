@@ -35,6 +35,7 @@ def login():
 
         conexao = get_db_connection()
         with conexao.cursor() as cursor:
+            # Seleciona o usuário e seu papel (role)
             cursor.execute("SELECT * FROM usuarios WHERE usuario=%s AND senha=%s", (usuario, senha))
             user = cursor.fetchone()
         conexao.close()
@@ -42,11 +43,21 @@ def login():
         if user:
             session['usuario_id'] = user['id']
             session['usuario_nome'] = user['usuario']
+            # Armazena o papel do usuário na sessão
+            session['user_role'] = user.get('role', 'user') 
             return redirect(url_for('novo_evento_page'))
         else:
             return "Usuário ou senha inválidos", 401
 
     return render_template("login.html")
+
+@app.route('/check-admin-status', methods=['GET'])
+def check_admin_status():
+    # Verifica se o usuário está logado E se tem a role de 'admin'
+    if 'user_role' in session and session['user_role'] == 'admin':
+        return jsonify({'isAdmin': True})
+    return jsonify({'isAdmin': False})
+
 
 @app.route('/novo-evento')
 def novo_evento_page():
@@ -62,11 +73,12 @@ def logout():
     session.clear()
     return redirect('/login')
 
-def formatar_evento(row):
+def formatar_evento(row, is_admin=False):
     imagem_url = row.get('imagem_url')
     if imagem_url:
         imagem_url = f"http://localhost:5000/uploads/{imagem_url}"
-    return {
+    
+    evento = {
         'id': row['id'],
         'nomeEvento': row['nomeEvento'],
         'dataInicial': row['dataInicial'],
@@ -74,8 +86,11 @@ def formatar_evento(row):
         'descricao': row['descricao'],
         'eventColor': row['eventColor'],
         'imagem_url': imagem_url,
-        'usuario_nome': row.get('usuario')
     }
+    # Somente adiciona o nome do usuário se for admin
+    if is_admin:
+        evento['usuario_nome'] = row.get('usuario')
+    return evento
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
@@ -83,27 +98,28 @@ def uploaded_file(filename):
 
 @app.route('/datas', methods=['GET'])
 def obter_eventos():
+    # A verificação de admin é feita com base na sessão
+    is_admin = 'user_role' in session and session['user_role'] == 'admin'
     conexao = get_db_connection()
     cursor = conexao.cursor()
-    # Faz um JOIN para buscar o nome do usuário
     cursor.execute('SELECT d.*, u.usuario FROM dados d LEFT JOIN usuarios u ON d.usuario_id = u.id')
     rows = cursor.fetchall()
     conexao.close()
-    eventos = [formatar_evento(row) for row in rows]
+    eventos = [formatar_evento(row, is_admin) for row in rows]
     return jsonify(eventos)
 
 @app.route('/datasFiltro', methods=['GET'])
 def filtrar_eventos():
+    is_admin = 'user_role' in session and session['user_role'] == 'admin'
     nome_evento = request.args.get('nomeEvento', '').strip()
 
     conexao = get_db_connection()
     cursor = conexao.cursor()
-    # Faz um JOIN para buscar o nome do usuário no filtro
     cursor.execute("SELECT d.*, u.usuario FROM dados d LEFT JOIN usuarios u ON d.usuario_id = u.id WHERE d.nomeEvento LIKE %s", (f"%{nome_evento}%",))
     rows = cursor.fetchall()
     conexao.close()
 
-    eventos = [formatar_evento(row) for row in rows]
+    eventos = [formatar_evento(row, is_admin) for row in rows]
     return jsonify(eventos)
 
 @app.route('/datas', methods=['POST'])
