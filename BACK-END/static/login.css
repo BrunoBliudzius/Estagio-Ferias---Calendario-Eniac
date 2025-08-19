@@ -1,0 +1,159 @@
+.divCabecalho {
+    background-color: #054161;
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center;     /* Centraliza verticalmente */
+    height: 100px; /* ajuste se necessário */
+}
+
+#eniac {
+    padding: 15px;
+    max-height: 90px;
+    
+}
+
+body {
+            font-family: Arial, Helvetica, sans-serif;
+            
+        }
+
+
+        .box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(5, 65, 97, 1);
+            padding: 15px;
+            border-radius: 15px;
+            width: 40%;
+            color: white;
+            margin-top: 20px;
+        }
+
+
+        fieldset {
+            border: 3px solid #ffe466;
+            text-align: center;
+
+        }
+
+
+
+        .inputBox {
+            position: relative;
+            padding: 5px;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+
+        .inputUser {
+            background: none;
+            border: none;
+            border-bottom: 1px solid white;
+            outline: none;
+            color: white;
+            font-size: 15px;
+            width: 100%;
+            letter-spacing: 2px;
+        }
+
+
+
+
+        .labelInput {
+
+
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            pointer-events: none;
+            transition: .5s;
+        }
+
+
+        .inputUser:focus~.labelInput,
+        .inputUser:valid~.labelInput {
+            
+
+            top: -20px;
+            font-size: 12px;
+            color:white;
+        }
+
+
+#submit {
+
+
+            background-color: #ffe466;
+            width: 100%;
+            border: none;
+            padding: 15px;
+            color: #054161;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+
+
+        #submit:hover {
+            background-image: #054161;
+        }
+
+@media (max-width: 768px) {
+    .box {
+        width: 70%; /* Aumenta a largura da caixa em tablets */
+        padding: 25px; /* Ajusta o padding */
+    }
+
+    fieldset {
+        padding: 15px;
+    }
+
+    .inputUser  {
+        font-size: 16px; /* Aumenta o tamanho da fonte dos inputs */
+    }
+
+    #submit {
+        padding: 15px; /* Aumenta o padding do botão */
+        font-size: 16px; /* Aumenta o tamanho da fonte do botão */
+    }
+}
+
+@media (max-width: 480px) {
+    .box {
+        width: 90%; /* Aumenta a largura da caixa em celulares */
+        padding: 20px; /* Ajusta o padding */
+        margin-top: 10px; /* Ajusta a margem superior */
+    }
+
+    fieldset {
+        padding: 10px;
+    }
+
+    .inputBox {
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    .inputUser  {
+        font-size: 15px; /* Aumenta o tamanho da fonte dos inputs */
+    }
+
+    .labelInput {
+        font-size: 12px; /* Aumenta o tamanho da fonte do label */
+    }
+
+    .input:User focus~.labelInput,
+    .input:User valid~.labelInput {
+        top: -18px; /* Ajusta a posição do label */
+        font-size: 11px; /* Aumenta o tamanho do label ao focar */
+    }
+
+    #submit {
+        padding: 12px; /* Aumenta o padding do botão */
+        font-size: 15px; /* Aumenta o tamanho da fonte do botão */
+    }
+}
