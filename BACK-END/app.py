@@ -43,6 +43,19 @@ def get_db_connection():
 # NUNCA COLOQUE A CHAVE DA API DIRETAMENTE NO CÓDIGO!
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# ==============================
+# ALTERAÇÃO: helpers de data p/ janela de meses
+# ==============================
+def _add_months(d: date, months: int) -> date:
+    """Adiciona (ou subtrai) meses a uma data sem libs externas."""
+    y, m = d.year, d.month
+    m += months
+    # normaliza ano/mes
+    y += (m - 1) // 12
+    m = ((m - 1) % 12) + 1
+    # garante dia válido (aqui fixamos 1 para usar em 'primeiro dia do mês')
+    return date(y, m, 1)
+
 @app.route('/chat', methods=['POST'])
 def chat():
     pergunta = request.json.get("pergunta")
@@ -54,27 +67,28 @@ def chat():
         # 1. Buscar eventos do banco (com filtro de performance)
         conexao = get_db_connection()
         with conexao.cursor() as cursor:
-            # MELHORIA DE PERFORMANCE: Buscamos apenas eventos do mês atual para dar contexto
-            # Isso economiza tokens da API e torna a resposta mais rápida e precisa.
+            # MELHORIA DE PERFORMANCE (ALTERAÇÃO):
+            # Em vez de "somente mês atual", buscamos uma janela de -6 a +6 meses,
+            # o que permite responder sobre meses anteriores/posteriores mantendo o contexto enxuto.
             hoje = date.today()
-            primeiro_dia_mes = hoje.replace(day=1)
-            # Para o último dia, vamos pegar o primeiro dia do próximo mês e subtrair um dia
-            # Isso lida corretamente com meses de 28, 29, 30 ou 31 dias.
-            if hoje.month == 12:
-                ultimo_dia_mes = hoje.replace(year=hoje.year + 1, month=1, day=1)
-            else:
-                ultimo_dia_mes = hoje.replace(month=hoje.month + 1, day=1)
-            
-            # A query agora filtra por um intervalo de datas
-            sql = "SELECT nomeEvento, dataInicial, dataFinal, descricao FROM dados WHERE dataInicial BETWEEN %s AND %s"
-            cursor.execute(sql, (primeiro_dia_mes, ultimo_dia_mes))
+            janela_inicio = _add_months(hoje, -6)  # primeiro dia do mês de 6 meses atrás
+            janela_fim_exclusivo = _add_months(hoje, +7)  # primeiro dia do mês após +6 meses (limite exclusivo)
+
+            # ALTERAÇÃO: usamos intervalo [>= inicio, < fim_exclusivo] para performant e correto
+            sql = """
+                SELECT nomeEvento, dataInicial, dataFinal, descricao
+                FROM dados
+                WHERE dataInicial >= %s AND dataInicial < %s
+                ORDER BY dataInicial ASC
+            """
+            cursor.execute(sql, (janela_inicio, janela_fim_exclusivo))
             eventos = cursor.fetchall()
 
         # 2. Montar contexto com os eventos
         contexto = "Com base APENAS nos seguintes eventos do calendário, responda à pergunta do usuário.\n"
-        contexto += "Eventos cadastrados para este mês:\n"
+        contexto += f"Eventos cadastrados na janela {janela_inicio.strftime('%m/%Y')} a {(_add_months(hoje, +6)).strftime('%m/%Y')}:\n"
         if not eventos:
-            contexto += "Nenhum evento encontrado para o mês atual.\n"
+            contexto += "Nenhum evento encontrado na janela considerada.\n"
         else:
             for e in eventos:
                 # Formata as datas para um formato mais legível se não forem strings
@@ -93,7 +107,7 @@ def chat():
                 {"role": "system", "content": prompt_sistema},
                 {"role": "user", "content": f"Contexto dos eventos:\n{contexto}\n\nPergunta do usuário: {pergunta}"}
             ],
-            temperature=0.3
+            temperature=0.1
         )
         return jsonify({"resposta": resposta.choices[0].message.content})
 
@@ -155,16 +169,30 @@ def logout():
     session.clear()
     return redirect('/login')
 
+# ==============================
+# ALTERAÇÃO: util p/ serializar datas em ISO 8601 no JSON
+# ==============================
+def _to_iso8601(value):
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, date):
+        # normaliza para meia-noite local
+        return datetime(value.year, value.month, value.day).isoformat()
+    return value
+
 def formatar_evento(row, is_admin=False):
     imagem_url = row.get('imagem_url')
     if imagem_url:
-        imagem_url = f"http://localhost:5000/uploads/{imagem_url}"
+        # ALTERAÇÃO: monta URL da imagem baseada no host atual (mais robusto que localhost fixo)
+        base = request.host_url.rstrip('/')
+        imagem_url = f"{base}/uploads/{imagem_url}"
     
     evento = {
         'id': row['id'],
         'nomeEvento': row['nomeEvento'],
-        'dataInicial': row['dataInicial'],
-        'dataFinal': row['dataFinal'],
+        # ALTERAÇÃO: garante strings ISO p/ compatibilidade com FullCalendar/JSON
+        'dataInicial': _to_iso8601(row['dataInicial']),
+        'dataFinal': _to_iso8601(row['dataFinal']),
         'descricao': row['descricao'],
         'eventColor': row['eventColor'],
         'imagem_url': imagem_url,
