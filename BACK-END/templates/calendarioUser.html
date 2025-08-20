@@ -70,8 +70,26 @@
   <div class="container-flex">
     <div id="calendar" class="mt-4"></div>
 
-    <!-- Outros modais (visualizar, editar) permanecem aqui -->
-    <!-- ... -->
+    <div class="modal fade" id="viewEventModal" tabindex="-1" aria-labelledby="viewEventModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="viewEventModalLabel"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <p class="event-date"></p> <p class="event-description"></p> <div class="event-image-container">
+                </div>
+            <p id="modal-usuario" class="mt-2"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
   </div>
 
   <script>

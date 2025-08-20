@@ -12,9 +12,36 @@ document.addEventListener("DOMContentLoaded", async function () {
             const event = info.event;
             idEventoSelecionado = event.id;
 
-            document.querySelector(".modal-title").textContent = event.title;
-            document.querySelector(".modal-body p:first-of-type").innerHTML =
-                `<strong>Data:</strong> ${event.start.toLocaleDateString()}<br><strong>Descrição:</strong> ${event.extendedProps.descricao}`;
+            // Agora, sempre abra o modal de visualização
+            const viewModal = new bootstrap.Modal(document.getElementById("viewEventModal")); // APONTE PARA O ID DO SEU MODAL DE VISUALIZAÇÃO
+
+            // Preencha os campos do modal de visualização
+            document.querySelector("#viewEventModal .modal-title").textContent = event.title;
+            document.querySelector("#viewEventModal .modal-body .event-date").innerHTML = `<strong>Data:</strong> ${event.start.toLocaleDateString()}`;
+            document.querySelector("#viewEventModal .modal-body .event-description").innerHTML = `<strong>Descrição:</strong> ${event.extendedProps.descricao}`;
+
+            // Lógica para imagem
+            const imgContainer = document.querySelector("#viewEventModal .modal-body .event-image-container");
+            if (event.extendedProps.imagem_url) {
+                let imgEl = document.getElementById("view-modal-img-evento");
+                if (!imgEl) {
+                    // Crie a tag img se ela ainda não existir
+                    imgEl = document.createElement("img");
+                    imgEl.id = "view-modal-img-evento";
+                    imgEl.style.maxWidth = "100%";
+                    imgEl.style.marginTop = "10px";
+                    imgContainer.appendChild(imgEl);
+                }
+                imgEl.src = event.extendedProps.imagem_url;
+                imgEl.style.display = "block"; // Garante que a imagem é visível
+            } else {
+                // Se não houver imagem, esconda o elemento img se ele existir
+                const imgEl = document.getElementById("view-modal-img-evento");
+                if (imgEl) {
+                    imgEl.style.display = "none";
+                }
+            }
+
 
             // Exibe o nome do usuário que alterou o evento SOMENTE se for admin
             const usuarioEl = document.getElementById("modal-usuario");
@@ -24,31 +51,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 usuarioEl.innerHTML = "";
             }
 
-            if (event.extendedProps.imagem_url) {
-                if (!document.getElementById("modal-img-evento")) {
-                    const img = document.createElement("img");
-                    img.id = "modal-img-evento";
-                    img.style.maxWidth = "100%";
-                    img.style.marginTop = "10px";
-                    document.querySelector(".modal-body").appendChild(img);
-                }
-                document.getElementById("modal-img-evento").src = event.extendedProps.imagem_url;
-                document.getElementById("modal-img-evento").style.display = "block";
-            } else {
-                if (document.getElementById("modal-img-evento")) {
-                    document.getElementById("modal-img-evento").style.display = "none";
-                }
-            }
-
-            document.getElementById("editNomeEvento").value = event.title;
-            document.getElementById("editDataInicial").value = event.startStr;
-            document.getElementById("editDataFinal").value = event.endStr
-                ? new Date(new Date(event.endStr).setDate(new Date(event.endStr).getDate() - 1)).toISOString().split("T")[0]
-                : event.startStr;
-            document.getElementById("editCorEvento").value = event.backgroundColor || "#3788d8";
-            document.getElementById("editDescricao").value = event.extendedProps.descricao || "";
-
-            new bootstrap.Modal(document.querySelector(".modal")).show();
+            viewModal.show(); // Exibe o modal
         },
         height: "auto",
         initialView: "dayGridMonth",
