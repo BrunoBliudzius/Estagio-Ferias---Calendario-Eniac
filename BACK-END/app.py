@@ -1,4 +1,5 @@
 import os
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' # Permite OAuth em HTTP (desenvolvimento)
 import uuid
 from flask import Flask, request, jsonify, send_from_directory, render_template, redirect, url_for, session
 from flask_cors import CORS
@@ -7,22 +8,32 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from datetime import datetime, date
 
-# Carrega variáveis de ambiente do arquivo .env (como senhas e chaves)
+# Imports para a integração com o Google Agenda
+import google.oauth2.credentials
+import google_auth_oauthlib.flow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+import json
+
+# Carrega variáveis de ambiente do arquivo .env
 load_dotenv()
 
 # Configuração do app Flask
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", os.urandom(24))  # Chave usada para sessões
-app.permanent_session_lifetime = 3600  # Tempo de expiração da sessão
-CORS(app, resources={r"/*": {"origins": "*"}})  # Permite requisições externas (CORS liberado)
+app.secret_key = os.getenv("FLASK_SECRET_KEY", os.urandom(24))
+app.permanent_session_lifetime = 3600
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Configuração da pasta de uploads (imagens de eventos)
+# Configuração da pasta de uploads
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Extensões permitidas para upload de imagens
+# Extensões permitidas
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "bmp", "tiff", "svg", "jfif"}
+
+# Configuração do Google OAuth
+SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
 # Função utilitária: verifica se o arquivo tem extensão permitida
 def allowed_file(filename):
@@ -33,7 +44,7 @@ def allowed_file(filename):
 def calendario_page():
     return render_template("calendarioUser.html")
 
-# Conexão com banco de dados usando variáveis de ambiente
+# Conexão com banco de dados
 def get_db_connection():
     return pymysql.connect(
         host=os.getenv("DB_HOST"),
@@ -43,10 +54,10 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-# Cliente da API OpenAI (para o chat do calendário inteligente)
+# Cliente da API OpenAI
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Função auxiliar: soma/subtrai meses em uma data (para calcular janelas de eventos)
+# Função auxiliar: soma/subtrai meses em uma data
 def _add_months(d: date, months: int) -> date:
     y, m = d.year, d.month
     m += months
@@ -54,32 +65,25 @@ def _add_months(d: date, months: int) -> date:
     m = ((m - 1) % 12) + 1
     return date(y, m, 1)
 
-# Rota de chat com IA (responde perguntas sobre os eventos)
+# Rota de chat com IA
 @app.route('/chat', methods=['POST'])
 def chat():
-    pergunta = request.json.get("pergunta")  # Pergunta do usuário
+    pergunta = request.json.get("pergunta")
     if not pergunta:
         return jsonify({"erro": "A pergunta não pode estar vazia."}), 400
 
     conexao = None
     try:
-        # Busca eventos do banco em uma janela de -6 a +6 meses
         conexao = get_db_connection()
         with conexao.cursor() as cursor:
             hoje = date.today()
             janela_inicio = _add_months(hoje, -6)
             janela_fim_exclusivo = _add_months(hoje, +7)
 
-            sql = """
-                SELECT nomeEvento, dataInicial, dataFinal, descricao
-                FROM dados
-                WHERE dataInicial >= %s AND dataInicial < %s
-                ORDER BY dataInicial ASC
-            """
+            sql = "SELECT nomeEvento, dataInicial, dataFinal, descricao FROM dados WHERE dataInicial >= %s AND dataInicial < %s ORDER BY dataInicial ASC"
             cursor.execute(sql, (janela_inicio, janela_fim_exclusivo))
             eventos = cursor.fetchall()
 
-        # Monta o contexto que será enviado para a IA
         contexto = "Com base APENAS nos seguintes eventos do calendário, responda à pergunta do usuário.\n"
         contexto += f"Eventos cadastrados na janela {janela_inicio.strftime('%m/%Y')} a {(_add_months(hoje, +6)).strftime('%m/%Y')}:\n"
         if not eventos:
@@ -90,11 +94,9 @@ def chat():
                 data_fim = e['dataFinal'].strftime('%d/%m/%Y %H:%M') if isinstance(e['dataFinal'], datetime) else e['dataFinal']
                 contexto += f"- Título: {e['nomeEvento']}, Início: {data_ini}, Fim: {data_fim}, Descrição: {e['descricao']}\n"
 
-        # Adiciona data/hora atual no prompt
         data_atual_str = datetime.now().strftime("%d/%m/%Y %H:%M")
         prompt_sistema = f"Você é um assistente de calendário prestativo. A data e hora atual é {data_atual_str}. Responda de forma concisa e amigável."
 
-        # Envia para IA responder
         resposta = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -113,7 +115,7 @@ def chat():
         if conexao:
             conexao.close()
 
-# Rota de login (cria sessão do usuário)
+# Rota de login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -129,20 +131,20 @@ def login():
         if user:
             session['usuario_id'] = user['id']
             session['usuario_nome'] = user['usuario']
-            session['user_role'] = user.get('role', 'user')  # Guarda se é admin ou não
+            session['user_role'] = user.get('role', 'user')
             return redirect(url_for('novo_evento_page'))
         else:
             return "Usuário ou senha inválidos", 401
     return render_template("login.html")
 
-# Rota que verifica se o usuário logado é admin
+# Rota que verifica se o usuário é admin
 @app.route('/check-admin-status', methods=['GET'])
 def check_admin_status():
     if 'user_role' in session and session['user_role'] == 'admin':
         return jsonify({'isAdmin': True})
     return jsonify({'isAdmin': False})
 
-# Página de criação de novo evento (só acessível logado)
+# Página de criação de novo evento
 @app.route('/novo-evento')
 def novo_evento_page():
     if 'usuario_id' not in session:
@@ -150,13 +152,13 @@ def novo_evento_page():
     nome_formatado = session['usuario_nome'].title()
     return render_template("NovoEvento.html", usuario_nome=nome_formatado)
 
-# Logout (limpa sessão do usuário)
+# Logout
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect('/login')
 
-# Função auxiliar: converte datas em formato ISO 8601 para JSON
+# Função auxiliar: converte datas para formato ISO 8601
 def _to_iso8601(value):
     if isinstance(value, datetime):
         return value.isoformat()
@@ -164,7 +166,7 @@ def _to_iso8601(value):
         return datetime(value.year, value.month, value.day).isoformat()
     return value
 
-# Função para formatar um evento em JSON
+# Formata um evento para JSON
 def formatar_evento(row, is_admin=False):
     imagem_url = row.get('imagem_url')
     if imagem_url:
@@ -184,7 +186,7 @@ def formatar_evento(row, is_admin=False):
         evento['usuario_nome'] = row.get('usuario')
     return evento
 
-# Rota para servir arquivos de upload (imagens)
+# Rota para servir arquivos de upload
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
@@ -201,7 +203,7 @@ def obter_eventos():
     eventos = [formatar_evento(row, is_admin) for row in rows]
     return jsonify(eventos)
 
-# Rota GET que filtra eventos pelo nome
+# Rota GET que filtra eventos
 @app.route('/datasFiltro', methods=['GET'])
 def filtrar_eventos():
     is_admin = 'user_role' in session and session['user_role'] == 'admin'
@@ -229,7 +231,6 @@ def criar_evento():
     descricao = request.form.get('descricao')
     eventColor = request.form.get('eventColor')
 
-    # Upload da imagem do evento
     imagem_url = None
     if 'imagem' in request.files:
         file = request.files['imagem']
@@ -251,7 +252,7 @@ def criar_evento():
 
     return jsonify({'mensagem': 'Evento criado com sucesso'}), 201
 
-# Rota PUT para atualizar um evento existente
+# Rota PUT para atualizar um evento
 @app.route('/datas/<int:event_id>', methods=['PUT'])
 def atualizar_evento(event_id):
     if 'usuario_id' not in session:
@@ -272,7 +273,6 @@ def atualizar_evento(event_id):
         conexao.close()
         return jsonify({'erro': 'Evento não encontrado'}), 404
 
-    # Atualiza imagem caso seja enviada uma nova
     imagem_url = evento.get('imagem_url')
     if 'imagem' in request.files and request.files['imagem'].filename != '':
         file = request.files['imagem']
@@ -302,6 +302,137 @@ def deletar_evento(event_id):
     conexao.commit()
     conexao.close()
     return jsonify({'mensagem': 'Evento excluído com sucesso'})
+    
+# Rota para iniciar a autenticação com o Google
+@app.route('/google-login')
+def google_login():
+    client_config = {
+        "web": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "redirect_uris": ["http://localhost:5000/google-callback"]
+        }
+    }
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+        client_config, scopes=SCOPES)
+    
+    flow.redirect_uri = url_for('google_callback', _external=True)
+    authorization_url, state = flow.authorization_url(
+        access_type='offline',
+        include_granted_scopes='true')
+
+    session['state'] = state
+    return redirect(authorization_url)
+
+# Rota de callback do Google
+@app.route('/google-callback')
+def google_callback():
+    state = session['state']
+    client_config = {
+        "web": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "redirect_uris": ["http://localhost:5000/google-callback"]
+        }
+    }
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+        client_config, scopes=SCOPES, state=state)
+    flow.redirect_uri = url_for('google_callback', _external=True)
+
+    authorization_response = request.url
+    flow.fetch_token(authorization_response=authorization_response)
+
+    credentials = flow.credentials
+    session['google_credentials'] = {
+        'token': credentials.token,
+        'refresh_token': credentials.refresh_token,
+        'token_uri': credentials.token_uri,
+        'client_id': credentials.client_id,
+        'client_secret': credentials.client_secret,
+        'scopes': credentials.scopes
+    }
+
+    return redirect(url_for('import_google_calendar'))
+
+# ROTA PARA IMPORTAR OS EVENTOS DO GOOGLE AGENDA (VERSÃO FINAL E SEGURA)
+@app.route('/import-google-calendar')
+def import_google_calendar():
+    if 'google_credentials' not in session:
+        return redirect(url_for('google_login'))
+
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
+    credentials = google.oauth2.credentials.Credentials(**session['google_credentials'])
+    
+    try:
+        service = build('calendar', 'v3', credentials=credentials)
+        now = datetime.utcnow().isoformat() + 'Z'
+        
+        events_result = service.events().list(
+            calendarId='primary', timeMin=now,
+            maxResults=50, singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+        google_events = events_result.get('items', [])
+
+        if not google_events:
+            return redirect(url_for('calendario_page'))
+
+        conexao = get_db_connection()
+        cursor = conexao.cursor()
+        current_user_id = session['usuario_id']
+
+        # Pega os IDs dos eventos que serão importados
+        google_event_ids = [event['id'] for event in google_events]
+
+        # 1. DELETA os eventos antigos do Google que pertencem a este usuário
+        # Isso garante que se um evento for cancelado no Google, ele será removido aqui.
+        if google_event_ids:
+            # O placeholder %s será expandido para a quantidade correta de IDs
+            format_strings = ','.join(['%s'] * len(google_event_ids))
+            delete_sql = f"""
+                DELETE FROM dados 
+                WHERE usuario_id = %s AND google_event_id IS NOT NULL
+            """
+            cursor.execute(delete_sql, (current_user_id,))
+
+        # 2. INSERE a lista de eventos mais recente do Google
+        eventos_para_inserir = []
+        for event in google_events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            end = event['end'].get('dateTime', event['end'].get('date'))
+            
+            eventos_para_inserir.append((
+                event.get('summary', 'Evento do Google'),
+                start,
+                end,
+                event.get('description', ''),
+                '#34a853', # Cor verde para eventos do Google
+                current_user_id,
+                event['id']
+            ))
+
+        if eventos_para_inserir:
+            insert_sql = """
+                INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, usuario_id, google_event_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.executemany(insert_sql, eventos_para_inserir)
+        
+        conexao.commit()
+        cursor.close()
+        conexao.close()
+
+        return redirect(url_for('calendario_page'))
+
+    except HttpError as error:
+        print(f'Ocorreu um erro: {error}')
+        return "Ocorreu um erro ao buscar os eventos do Google Agenda.", 500
 
 # Inicia o servidor Flask
 if __name__ == '__main__':

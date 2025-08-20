@@ -115,3 +115,5 @@ ADD COLUMN `role` VARCHAR(20) NOT NULL DEFAULT 'user' AFTER `senha`;
 UPDATE `usuarios`
 SET `role` = 'admin'
 WHERE `id` = '1';
+
+ALTER TABLE dados ADD COLUMN google_event_id VARCHAR(255) NULL UNIQUE;

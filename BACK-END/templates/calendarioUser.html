@@ -17,23 +17,23 @@
   <div class="divCabecalho">
     <div class="esquerda">
 
-      <!-- Botão para abrir o modal -->
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#chatModal">
         <i class="bi bi-robot"></i> Perguntar à IA
       </button>
 
-      <!-- Modal -->
+      <a href="{{ url_for('google_login') }}" class="btn btn-info ms-2">
+          <i class="bi bi-google"></i> Importar do Google Agenda
+      </a>
+
       <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
 
-            <!-- Cabeçalho -->
             <div class="modal-header">
               <h5 class="modal-title" id="chatModalLabel">Assistente de Eventos</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <!-- Corpo -->
             <div class="modal-body">
               <div class="mb-3">
                 <label for="pergunta" class="form-label">O que você gostaria de saber sobre os eventos deste
@@ -46,8 +46,7 @@
               <hr>
               <h6>Resposta:</h6>
               <div id="resposta" class="p-2 bg-light rounded" style="min-height: 50px;">
-                <!-- A resposta da IA aparecerá aqui -->
-              </div>
+                </div>
             </div>
           </div>
         </div>

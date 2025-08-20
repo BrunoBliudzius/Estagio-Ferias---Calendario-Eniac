@@ -81,11 +81,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     monthInput.className = "form-control form-control-sm";
     monthInput.style.width = "170px";
 
-    // const btnIr = document.createElement("button");
-    // btnIr.type = "button";
-    // btnIr.className = "btn btn-primary btn-sm ms-2";
-    // btnIr.textContent = "Ir para a data selecionada";
-
     const cur = calendar.getDate();
     monthInput.value = cur.getFullYear() + "-" + String(cur.getMonth() + 1).padStart(2, "0");
 
@@ -95,13 +90,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
     monthInput.addEventListener("change", gotoMonth);
-    // btnIr.addEventListener("click", gotoMonth);
 
     const rightChunk =
         calendarEl.querySelector(".fc-header-toolbar .fc-toolbar-chunk:last-child") ||
         calendarEl.querySelector(".fc-header-toolbar .fc-toolbar-chunk");
     wrapper.appendChild(monthInput);
-    // wrapper.appendChild(btnIr);
     if (rightChunk) rightChunk.appendChild(wrapper);
 
     const res = await fetch("http://localhost:5000/datas");
@@ -183,14 +176,68 @@ async function FuncaoPesquisa() {
     const tbody = document.getElementById("tbodyEventos");
     tbody.innerHTML = "";
     eventos.forEach((evt) => {
-        tbody.innerHTML += `<tr>
-                    <td>${evt.id}</td>
-                    <td>${evt.nomeEvento}</td>
-                    <td>${evt.dataInicial}</td>
-                    <td>${evt.dataFinal}</td>
-                    <td style="background:${evt.eventColor}"></td>
-                </tr>`;
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${evt.id}</td>
+            <td>${evt.nomeEvento}</td>
+            <td>${evt.dataInicial.split("T")[0]}</td>
+            <td>${evt.dataFinal.split("T")[0]}</td>
+            <td style="background:${evt.eventColor}"></td>
+            <td><button class="btn btn-primary btn-sm" onclick='abrirModalEvento(${JSON.stringify(evt)})'>Ver</button></td>
+        `;
+        tbody.appendChild(row);
     });
+}
+
+function abrirModalEvento(evt) {
+    idEventoSelecionado = evt.id;
+
+    document.querySelector(".modal-title").textContent = evt.nomeEvento;
+    document.querySelector(".modal-body p:first-of-type").innerHTML =
+        `<strong>Data:</strong> ${new Date(evt.dataInicial).toLocaleDateString()}<br><strong>Descrição:</strong> ${evt.descricao || ""}`;
+
+    const usuarioEl = document.getElementById("modal-usuario");
+    if (evt.usuario_nome) {
+        usuarioEl.innerHTML = `<strong>Última alteração por:</strong> ${evt.usuario_nome}`;
+    } else {
+        usuarioEl.innerHTML = "";
+    }
+
+    let modalImg = document.getElementById("modal-img-evento");
+    if (evt.imagem_url) {
+        if (!modalImg) {
+            modalImg = document.createElement("img");
+            modalImg.id = "modal-img-evento";
+            modalImg.style.maxWidth = "100%";
+            modalImg.style.marginTop = "10px";
+            document.querySelector(".modal-body").appendChild(modalImg);
+        }
+        modalImg.src = evt.imagem_url;
+        modalImg.style.display = "block";
+    } else if (modalImg) {
+        modalImg.style.display = "none";
+    }
+
+    document.getElementById("editNomeEvento").value = evt.nomeEvento;
+    document.getElementById("editDataInicial").value = evt.dataInicial.split("T")[0];
+    document.getElementById("editDataFinal").value = evt.dataFinal.split("T")[0];
+    document.getElementById("editCorEvento").value = evt.eventColor || "#3788d8";
+    document.getElementById("editDescricao").value = evt.descricao || "";
+
+    const imgContainer = document.getElementById("editImagemEvento").parentElement;
+    let imgPreview = document.getElementById("editImagemPreview");
+    if (!imgPreview) {
+        imgPreview = document.createElement("img");
+        imgPreview.id = "editImagemPreview";
+        imgPreview.style.maxWidth = "100%";
+        imgPreview.style.marginTop = "10px";
+        imgContainer.appendChild(imgPreview);
+    }
+    imgPreview.src = evt.imagem_url || "";
+
+
+    const eventModal = new bootstrap.Modal(document.querySelector('.modal'));
+    eventModal.show();
 }
 
 async function FuncaoDeletar() {
