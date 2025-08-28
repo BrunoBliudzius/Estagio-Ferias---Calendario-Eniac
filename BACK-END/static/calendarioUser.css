@@ -7,12 +7,6 @@
     position: relative; /* Essencial para o posicionamento absoluto do filho */
 }
 
-.esquerda {
-    position: absolute; /* Posição absoluta em relação ao pai (.divCabecalho) */
-    left: 15px;         /* Distância da borda esquerda */
-    bottom: 10px;       /* Distância da borda inferior */
-}
-
 .divDireita {
     position: absolute;
     top: 8px;

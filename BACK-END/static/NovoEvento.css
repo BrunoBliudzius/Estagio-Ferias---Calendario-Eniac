@@ -65,6 +65,28 @@ textarea{
   margin-bottom: 10px;
 }
 
+/* Estilo base dos botões */
+.btn-custom {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 15px;
+  transition: 0.3s;
+}
+
+/* Botão Google Agenda */
+.btn-google {
+  background-color: #ffe466;; /* Azul Google */
+  color: #00394f;
+}
+
+.btn-google:hover {
+  background-color: #4981fc;
+} 
 #cadastrarEvento,
 #voltar {
   background-color: #ffe466;

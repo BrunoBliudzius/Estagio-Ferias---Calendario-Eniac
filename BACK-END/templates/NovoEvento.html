@@ -46,7 +46,10 @@
             <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" style= />
             <button id="voltar">
               <a href="http://localhost:5000/calendario">Ir para calendário</a>
-            </button>
+            </button> <br>
+            <button type="button" class="btn-custom btn-google" onclick="window.location.href='{{ url_for('google_login') }}'">
+              <i class="bi bi-google"></i> Importar do Google Agenda
+            </button>            
           </fieldset>
         </form>
       </div>
