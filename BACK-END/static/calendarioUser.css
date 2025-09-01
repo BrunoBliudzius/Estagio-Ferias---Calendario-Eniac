@@ -36,6 +36,16 @@
     text-decoration: none;
 }
 
+.fc-daygrid-week-number {
+    display: flex;
+    align-items: flex-end; /* Alinha na parte inferior */
+    justify-content: center;
+    height: 100%;
+    padding-bottom: 4px;
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
 .ia-btn {
     position: fixed;
     bottom: 20px;

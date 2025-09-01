@@ -55,7 +55,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         },
         height: "auto",
         initialView: "dayGridMonth",
+        firstDay: 0,
         locale: "pt-br",
+        weekNumbers: true,              // ativa a numeração das semanas
+        weekNumbersWithinDays: false,   // faz aparecer na coluna lateral
+        weekNumberContent: function(arg) {
+            return { html: 'S' + arg.num };
+        },        
         headerToolbar: {
             left: "prev,next today",
             center: "title",
@@ -68,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     document.getElementById("monthPicker").showPicker();
                 }
             }
-        }
+        },
     });
 
     calendar.render();
