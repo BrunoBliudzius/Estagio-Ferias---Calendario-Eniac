@@ -7,6 +7,9 @@ import pymysql
 from openai import OpenAI
 from dotenv import load_dotenv
 from datetime import datetime, date
+import smtplib
+from email.message import EmailMessage
+import mimetypes
 
 # Imports para a integração com o Google Agenda
 import google.oauth2.credentials
@@ -103,7 +106,7 @@ def chat():
                 {"role": "system", "content": prompt_sistema},
                 {"role": "user", "content": f"Contexto dos eventos:\n{contexto}\n\nPergunta do usuário: {pergunta}"}
             ],
-            temperature=0.1
+            temperature=0.4
         )
         return jsonify({"resposta": resposta.choices[0].message.content})
 
@@ -230,6 +233,24 @@ def criar_evento():
     dataFinal = request.form.get('dataFinal')
     descricao = request.form.get('descricao')
     eventColor = request.form.get('eventColor')
+
+    #Enviar email para o participante
+    remetente = "brunosilvabliu@gmail.com"
+    email_participante = request.form.get('email')
+    assunto = "Convite para o Evento"
+    mensagem = f"Olá, estou enviando esse email para informar que você foi convidado para o evento: {nomeEvento}, que ocorrerá de {dataInicial} até {dataFinal}. Descrição do evento: {descricao}."
+    senha = "bajo zusc ygzw fyqz"
+
+    msg = EmailMessage()
+    msg['From'] = remetente
+    msg['To'] = email_participante
+    msg['Subject'] = assunto
+    msg.set_content(mensagem)
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as email:
+        email.login(remetente, senha)
+        email.send_message(msg)
+
 
     imagem_url = None
     if 'imagem' in request.files:

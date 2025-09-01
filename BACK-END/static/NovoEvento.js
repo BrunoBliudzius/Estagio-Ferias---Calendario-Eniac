@@ -160,7 +160,6 @@ document.getElementById("formEvento").addEventListener("submit", async (e) => {
     });
 
     if (res.ok || res.status === 201) {
-        alert("Evento cadastrado com sucesso!");
         location.reload();
     } else {
         alert("Erro ao cadastrar evento!");
