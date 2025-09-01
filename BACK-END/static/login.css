@@ -3,7 +3,7 @@
     display: flex;
     justify-content: center; /* Centraliza horizontalmente */
     align-items: center;     /* Centraliza verticalmente */
-    height: 100px; /* ajuste se necessário */
+    height: 100px;
 }
 
 #eniac {
@@ -105,7 +105,7 @@ body {
 @media (max-width: 768px) {
     .box {
         width: 70%; /* Aumenta a largura da caixa em tablets */
-        padding: 25px; /* Ajusta o padding */
+        padding: 25px; 
     }
 
     fieldset {
@@ -113,20 +113,20 @@ body {
     }
 
     .inputUser  {
-        font-size: 16px; /* Aumenta o tamanho da fonte dos inputs */
+        font-size: 16px; 
     }
 
     #submit {
-        padding: 15px; /* Aumenta o padding do botão */
-        font-size: 16px; /* Aumenta o tamanho da fonte do botão */
+        padding: 15px; 
+        font-size: 16px; 
     }
 }
 
 @media (max-width: 480px) {
     .box {
         width: 90%; /* Aumenta a largura da caixa em celulares */
-        padding: 20px; /* Ajusta o padding */
-        margin-top: 10px; /* Ajusta a margem superior */
+        padding: 20px; 
+        margin-top: 10px; 
     }
 
     fieldset {
@@ -139,11 +139,11 @@ body {
     }
 
     .inputUser  {
-        font-size: 15px; /* Aumenta o tamanho da fonte dos inputs */
+        font-size: 15px; 
     }
 
     .labelInput {
-        font-size: 12px; /* Aumenta o tamanho da fonte do label */
+        font-size: 12px;
     }
 
     .input:User focus~.labelInput,
@@ -153,7 +153,7 @@ body {
     }
 
     #submit {
-        padding: 12px; /* Aumenta o padding do botão */
-        font-size: 15px; /* Aumenta o tamanho da fonte do botão */
+        padding: 12px; 
+        font-size: 15px; 
     }
 }

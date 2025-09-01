@@ -31,7 +31,7 @@ body {
 .box2{
   max-width: 800px;      /* controla a largura */
   margin: 0 auto;        /* centraliza horizontalmente */
-  background-color: #004060; /* cor de fundo opcional */
+  background-color: #004060; 
   padding: 30px;
   border-radius: 10px;
   color: white;
@@ -80,7 +80,7 @@ textarea{
 
 /* Botão Google Agenda */
 .btn-google {
-  background-color: #ffe466;; /* Azul Google */
+  background-color: #ffe466;;
   color: #00394f;
 }
 
@@ -142,19 +142,19 @@ textarea{
 
 .container-flex {
   display: flex;
-  align-items: stretch; /* alinha no topo */
+  align-items: stretch; 
   gap: 20px; /* espaço entre form e calendário */
 }
 
 #formulario {
-  flex: 1; /* Agora o form cresce junto com o calendário */
+  flex: 1; 
     margin: 0 !important;
     padding: 0;
 }
 
 #formulario fieldset {
-  margin-top: 0; /* remove espaço extra */
-  padding-top: 5px; /* ajusta a altura */
+  margin-top: 0; 
+  padding-top: 5px; 
 }
 
 #calendar {
@@ -162,7 +162,7 @@ textarea{
   max-width: 100%; /* largura desejada */
   padding: 15px;
   margin-right: 20px;
-    background-color: white; /* Exemplo de fundo */
+    background-color: white; 
     border-radius: 15px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     border: 1px solid #ccc;
@@ -171,7 +171,7 @@ textarea{
 @media (max-width: 992px) { /* Para tablets e telas menores que desktops */
     .container-flex {
         flex-direction: column; /* Empilha o formulário e o calendário */
-        align-items: center; /* Centraliza os itens empilhados */
+        align-items: center; 
     }
 
     .formulario {

@@ -29,17 +29,27 @@
     padding: 5px 15px;
     background-color: #ffe466; 
     border-radius: 20px;
-    border: none; /* Removendo a borda para ficar mais parecido com a imagem */
+    border: none; 
     font-weight: bold;
     color: #054161;
     cursor: pointer; 
     text-decoration: none;
 }
 
+.ia-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    border-radius: 30px;
+    padding: 10px 16px;
+    z-index: 1050; 
+    box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
+}
+
 @media (max-width: 768px) {
     .divCabecalho {
         flex-direction: column; /* Empilha os itens verticalmente */
-        height: auto; /* Altura automática para acomodar o conteúdo */
+        height: auto; 
         padding: 10px 0; 
     }
 
@@ -65,11 +75,11 @@
 
 @media (max-width: 480px) {
     #eniac {
-        max-height: 60px; /* Reduz ainda mais o tamanho do logo */
+        max-height: 60px; 
     }
 
     #evento {
-        font-size: 0.9em; /* Reduz o tamanho da fonte do botão */
+        font-size: 0.9em; 
         padding: 8px 12px;
     }
 }
