@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 from datetime import datetime, date
 import smtplib
 from email.message import EmailMessage
-import mimetypes
+from datetime import datetime
+
 
 # Imports para a integração com o Google Agenda
 import google.oauth2.credentials
@@ -169,6 +170,14 @@ def _to_iso8601(value):
         return datetime(value.year, value.month, value.day).isoformat()
     return value
 
+def calcular_semana_do_ano(data_str):
+    data = datetime.fromisoformat(data_str)
+    return data.isocalendar()[1]  # número da semana (1 a 53)
+
+def calcular_dia_da_semana(data_str):
+    data = datetime.fromisoformat(data_str)
+    return data.isoweekday()  # 1=segunda ... 7=domingo
+
 # Formata um evento para JSON
 def formatar_evento(row, is_admin=False):
     imagem_url = row.get('imagem_url')
@@ -233,6 +242,9 @@ def criar_evento():
     dataFinal = request.form.get('dataFinal')
     descricao = request.form.get('descricao')
     eventColor = request.form.get('eventColor')
+    repetir = request.form.get('repetir_anualmente', '0') == '1'
+    semana_do_ano = calcular_semana_do_ano(dataInicial)
+    dia_da_semana = calcular_dia_da_semana(dataInicial)
 
     # Enviar email para os participantes (se houver)
     remetente = "brunosilvabliu@gmail.com"
@@ -272,10 +284,22 @@ def criar_evento():
 
     conexao = get_db_connection()
     cursor = conexao.cursor()
-    cursor.execute("""
-        INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-    """, (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id))
+    if repetir:
+        ano_base = datetime.fromisoformat(dataInicial).year
+    for ano in range(ano_base, ano_base + 10):  # repetir próximos 10 anos
+        # gera a data correspondente no ano "ano"
+        data_ini = datetime.fromisocalendar(ano, semana_do_ano, dia_da_semana)
+        data_fim = data_ini + (datetime.fromisoformat(dataFinal) - datetime.fromisoformat(dataInicial))
+
+        cursor.execute("""
+            INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana, repetir_anualmente)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 1)
+        """, (nomeEvento, data_ini, data_fim, descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana))
+    else:
+        cursor.execute("""
+        INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana, repetir_anualmente)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0)
+    """, (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana))
     conexao.commit()
     conexao.close()
 

@@ -44,14 +44,19 @@
             <label for="CorEvento">Cor do Evento:</label>
             <input type="color" id="CorEvento" name="eventColor" value="#3788d8" />
             <label for="ImagemEvento">Imagem do Evento:</label>
+            <input class="form-check-input" type="checkbox" id="repetir_anualmente" name="repetir_anualmente" value="1">
+            <label class="form-check-label" for="repetir_anualmente">
+              Repetir todo ano na mesma semana
+            </label>
             <input type="file" id="ImagemEvento" name="imagem" accept="image/*" />
             <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" style= />
             <button id="voltar">
               <a href="http://localhost:5000/calendario">Ir para calendário</a>
             </button> <br>
-            <button type="button" class="btn-custom btn-google" onclick="window.location.href='{{ url_for('google_login') }}'">
+            <button type="button" class="btn-custom btn-google"
+              onclick="window.location.href='{{ url_for('google_login') }}'">
               <i class="bi bi-google"></i> Importar do Google Agenda
-            </button>            
+            </button>
           </fieldset>
         </form>
       </div>

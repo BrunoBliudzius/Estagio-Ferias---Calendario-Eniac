@@ -62,7 +62,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         height: "auto",
         initialView: "dayGridMonth",
         locale: "pt-br",
-
+        weekNumbers: true,              // ativa a numeração das semanas
+        weekNumbersWithinDays: false,   // faz aparecer na coluna lateral
+        weekNumberContent: function (arg) {
+            return { html: 'S' + arg.num };
+        },
         datesSet: function () {
             if (!monthInput) return;
             const d = calendar.getDate();
