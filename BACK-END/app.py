@@ -234,23 +234,31 @@ def criar_evento():
     descricao = request.form.get('descricao')
     eventColor = request.form.get('eventColor')
 
-    #Enviar email para o participante
+    # Enviar email para os participantes (se houver)
     remetente = "brunosilvabliu@gmail.com"
-    email_participante = request.form.get('email')
+    emails_raw = request.form.get('email')  # pode vir 1 ou vários e-mails separados por vírgula
     assunto = "Convite para o Evento"
-    mensagem = f"Olá, estou enviando esse email para informar que você foi convidado para o evento: {nomeEvento}, que ocorrerá de {dataInicial} até {dataFinal}. Descrição do evento: {descricao}."
+    mensagem = (
+        f"Olá, estou enviando esse email para informar que você foi convidado para o evento: "
+        f"{nomeEvento}, que ocorrerá de {dataInicial} até {dataFinal}. "
+        f"Descrição do evento: {descricao}."
+    )
     senha = "bajo zusc ygzw fyqz"
 
-    msg = EmailMessage()
-    msg['From'] = remetente
-    msg['To'] = email_participante
-    msg['Subject'] = assunto
-    msg.set_content(mensagem)
+    if emails_raw:  # só tenta enviar se não for vazio
+        # separa por vírgula e remove espaços vazios
+        emails = [e.strip() for e in emails_raw.split(",") if e.strip()]
 
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as email:
-        email.login(remetente, senha)
-        email.send_message(msg)
+        if emails:  # garante que tem destinatários válidos
+            msg = EmailMessage()
+            msg['From'] = remetente
+            msg['To'] = ", ".join(emails)  # cabeçalho visível no e-mail
+            msg['Subject'] = assunto
+            msg.set_content(mensagem)
 
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as email:
+                email.login(remetente, senha)
+                email.send_message(msg)
 
     imagem_url = None
     if 'imagem' in request.files:
@@ -272,6 +280,7 @@ def criar_evento():
     conexao.close()
 
     return jsonify({'mensagem': 'Evento criado com sucesso'}), 201
+
 
 # Rota PUT para atualizar um evento
 @app.route('/datas/<int:event_id>', methods=['PUT'])
