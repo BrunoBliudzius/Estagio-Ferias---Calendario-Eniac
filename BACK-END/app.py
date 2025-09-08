@@ -286,7 +286,7 @@ def criar_evento():
     cursor = conexao.cursor()
     if repetir:
         ano_base = datetime.fromisoformat(dataInicial).year
-    for ano in range(ano_base, ano_base + 10):  # repetir próximos  anos
+    for ano in range(ano_base + 1, ano_base + 10):  # repetir próximos  anos
         # gera a data correspondente no ano "ano"
         data_ini = datetime.fromisocalendar(ano, semana_do_ano, dia_da_semana)
         data_fim = data_ini + (datetime.fromisoformat(dataFinal) - datetime.fromisoformat(dataInicial))
