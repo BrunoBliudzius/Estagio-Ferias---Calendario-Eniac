@@ -80,18 +80,17 @@ def chat():
     try:
         conexao = get_db_connection()
         with conexao.cursor() as cursor:
-            hoje = date.today()
-            janela_inicio = _add_months(hoje, -6)
-            janela_fim_exclusivo = _add_months(hoje, +7)
-
-            sql = "SELECT nomeEvento, dataInicial, dataFinal, descricao FROM dados WHERE dataInicial >= %s AND dataInicial < %s ORDER BY dataInicial ASC"
-            cursor.execute(sql, (janela_inicio, janela_fim_exclusivo))
+            # Busca TODOS os eventos sem restrição de datas
+            sql = """SELECT nomeEvento, dataInicial, dataFinal, descricao 
+                     FROM dados 
+                     ORDER BY dataInicial ASC"""
+            cursor.execute(sql)
             eventos = cursor.fetchall()
 
+        # Monta o contexto
         contexto = "Com base APENAS nos seguintes eventos do calendário, responda à pergunta do usuário.\n"
-        contexto += f"Eventos cadastrados na janela {janela_inicio.strftime('%m/%Y')} a {(_add_months(hoje, +6)).strftime('%m/%Y')}:\n"
         if not eventos:
-            contexto += "Nenhum evento encontrado na janela considerada.\n"
+            contexto += "Nenhum evento encontrado no calendário.\n"
         else:
             for e in eventos:
                 data_ini = e['dataInicial'].strftime('%d/%m/%Y %H:%M') if isinstance(e['dataInicial'], datetime) else e['dataInicial']
@@ -111,13 +110,14 @@ def chat():
         )
         return jsonify({"resposta": resposta.choices[0].message.content})
 
-    except pymysql.Error as db_err:
+    except pymysql.Error:
         return jsonify({"erro": "Ocorreu um erro ao acessar o banco de dados."}), 500
-    except Exception as e:
+    except Exception:
         return jsonify({"erro": "Ocorreu um erro inesperado no servidor."}), 500
     finally:
         if conexao:
             conexao.close()
+
 
 # Rota de login
 @app.route('/login', methods=['GET', 'POST'])
