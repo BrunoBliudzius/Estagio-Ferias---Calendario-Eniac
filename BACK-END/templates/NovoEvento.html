@@ -33,20 +33,27 @@
             <legend><b>Cadastrar novo Evento</b></legend>
             <label for="NomeEvento">Nome do Evento</label>
             <input type="text" id="NomeEvento" name="nomeEvento" required />
+
             <label for="DataEvento">Data Inicial:</label>
             <input type="date" id="DataEvento" name="dataInicial" required />
+
             <label for="DataEvento2">Data Final:</label>
             <input type="date" id="DataEvento2" name="dataFinal" required />
+
             <label for="Descricao">Descrição:</label>
             <textarea id="Descricao" name="descricao" rows="2"></textarea>
+
             <label for="email">Email do Participante:</label>
             <textarea id="email" name="email" rows="2"></textarea>
+
             <label for="CorEvento">Cor do Evento:</label>
             <input type="color" id="CorEvento" name="eventColor" value="#3788d8" />
-            <label for="ImagemEvento">Imagem do Evento:</label>
+
+            <label for="ImagemEvento">Repetir todo ano na mesma semana:</label>
+
             <input class="form-check-input" type="checkbox" id="repetir_anualmente" name="repetir_anualmente" value="1">
             <label class="form-check-label" for="repetir_anualmente">
-              Repetir todo ano na mesma semana
+              Escolher uma imagem para o evento:
             </label>
             <input type="file" id="ImagemEvento" name="imagem" accept="image/*" />
             <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" style= />
