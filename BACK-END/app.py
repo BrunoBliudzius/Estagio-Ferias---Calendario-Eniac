@@ -6,7 +6,7 @@ from flask_cors import CORS
 import pymysql
 from openai import OpenAI
 from dotenv import load_dotenv
-from datetime import datetime, date, timedelta # << IMPORTADO O TIMEDELTA
+from datetime import datetime, date, timedelta # TIMEDELTA JÁ ESTÁ AQUI
 import smtplib
 from email.message import EmailMessage
 
@@ -67,7 +67,7 @@ def _add_months(d: date, months: int) -> date:
     m = ((m - 1) % 12) + 1
     return date(y, m, 1)
 
-# Rota de chat com IA
+# Rota de chat com IA (VERSÃO CORRIGIDA E INTELIGENTE)
 @app.route('/chat', methods=['POST'])
 def chat():
     pergunta = request.json.get("pergunta")
@@ -76,45 +76,92 @@ def chat():
 
     conexao = None
     try:
+        # ETAPA 1: Usar a IA para extrair informações da pergunta do usuário
+        prompt_extracao = f"""
+        Extraia o ano e o número da semana da seguinte pergunta do usuário.
+        Responda APENAS com um objeto JSON com as chaves "ano" e "semana".
+        Se não encontrar um ano, use o ano atual ({datetime.now().year}).
+        Se não encontrar um número de semana, a chave "semana" deve ser null.
+        Pergunta: "{pergunta}"
+        """
+        
+        response_extracao = client.chat.completions.create(
+            model="gpt-4o-mini",
+            response_format={"type": "json_object"},
+            messages=[{"role": "user", "content": prompt_extracao}]
+        )
+        
+        try:
+            dados_extraidos = json.loads(response_extracao.choices[0].message.content)
+            ano = dados_extraidos.get("ano")
+            semana = dados_extraidos.get("semana")
+        except (json.JSONDecodeError, AttributeError):
+            # Se a IA não retornar um JSON válido, faz uma busca genérica
+            ano = None
+            semana = None
+
+        # ETAPA 2: Construir uma consulta SQL precisa com base nos dados extraídos
         conexao = get_db_connection()
         with conexao.cursor() as cursor:
-            # Busca TODOS os eventos sem restrição de datas
-            sql = """SELECT nomeEvento, dataInicial, dataFinal, descricao 
-                     FROM dados 
-                     ORDER BY dataInicial ASC"""
-            cursor.execute(sql)
+            sql = "SELECT nomeEvento, dataInicial, dataFinal, descricao FROM dados WHERE "
+            params = []
+            
+            if ano and semana:
+                # O modo 1 do WEEK() considera a semana começando na Segunda-feira, igual ao isocalendar
+                sql += "YEAR(dataInicial) = %s AND WEEK(dataInicial, 1) = %s"
+                params.extend([ano, semana])
+            elif ano:
+                sql += "YEAR(dataInicial) = %s"
+                params.append(ano)
+            else:
+                # Se não extrair nada, busca pelo nome do evento na pergunta
+                sql += "nomeEvento LIKE %s"
+                params.append(f"%{pergunta}%")
+
+            sql += " ORDER BY dataInicial ASC"
+            cursor.execute(sql, tuple(params))
             eventos = cursor.fetchall()
 
-        # Monta o contexto
-        contexto = "Com base APENAS nos seguintes eventos do calendário, responda à pergunta do usuário.\n"
+        # ETAPA 3: Montar o contexto APENAS com os eventos corretos e gerar a resposta final
+        contexto = ""
         if not eventos:
-            contexto += "Nenhum evento encontrado no calendário.\n"
+            contexto = "Nenhum evento foi encontrado para a sua pesquisa.\n"
         else:
+            contexto += "Com base nos seguintes eventos encontrados, responda à pergunta do usuário:\n"
             for e in eventos:
-                data_ini = e['dataInicial'].strftime('%d/%m/%Y %H:%M') if isinstance(e['dataInicial'], datetime) else e['dataInicial']
-                data_fim = e['dataFinal'].strftime('%d/%m/%Y %H:%M') if isinstance(e['dataFinal'], datetime) else e['dataFinal']
-                contexto += f"- Título: {e['nomeEvento']}, Início: {data_ini}, Fim: {data_fim}, Descrição: {e['descricao']}\n"
+                data_ini = e['dataInicial'].strftime('%d/%m/%Y') if isinstance(e['dataInicial'], (datetime, date)) else e['dataInicial']
+                data_fim = e['dataFinal'].strftime('%d/%m/%Y') if isinstance(e['dataFinal'], (datetime, date)) else e['dataFinal']
+                contexto += f"- Título: {e['nomeEvento']}, Início: {data_ini}, Fim: {data_fim}\n"
 
-        data_atual_str = datetime.now().strftime("%d/%m/%Y %H:%M")
-        prompt_sistema = f"Você é um assistente de calendário prestativo. A data e hora atual é {data_atual_str}. Responda de forma concisa e amigável."
+        data_atual_str = datetime.now().strftime("%d/%m/%Y")
+        prompt_final = f"""
+        Você é um assistente de calendário amigável. A data atual é {data_atual_str}.
+        Seu colega (o banco de dados) já fez a pesquisa e encontrou os seguintes resultados.
+        Sua única tarefa é apresentar esses resultados de forma clara e concisa para o usuário.
+        Não adicione nenhuma informação que não esteja listada abaixo.
 
-        resposta = client.chat.completions.create(
+        Resultados da pesquisa:
+        {contexto}
+
+        Pergunta original do usuário: "{pergunta}"
+        """
+
+        resposta_final = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": prompt_sistema},
-                {"role": "user", "content": f"Contexto dos eventos:\n{contexto}\n\nPergunta do usuário: {pergunta}"}
-            ],
-            temperature=0.4
+            messages=[{"role": "user", "content": prompt_final}],
+            temperature=0.2 # Temperatura mais baixa para ser mais direto e menos criativo
         )
-        return jsonify({"resposta": resposta.choices[0].message.content})
 
-    except pymysql.Error:
+        return jsonify({"resposta": resposta_final.choices[0].message.content})
+
+    except pymysql.Error as db_error:
+        print(f"Erro de Banco de Dados: {db_error}")
         return jsonify({"erro": "Ocorreu um erro ao acessar o banco de dados."}), 500
     except Exception as e:
-        print(e) # Para depuração
+        print(f"Erro Inesperado: {e}")
         return jsonify({"erro": "Ocorreu um erro inesperado no servidor."}), 500
     finally:
-        if conexao:
+        if 'conexao' in locals() and conexao and conexao.open:
             conexao.close()
 
 
@@ -411,12 +458,10 @@ def import_google_calendar():
             start_str = event['start'].get('dateTime', event['start'].get('date'))
             end_str = event['end'].get('dateTime', event['end'].get('date'))
             
-            # --- CORREÇÃO DA DATA FINAL EXCLUSIVA ---
             data_inicial_obj = date.fromisoformat(start_str[:10])
             data_final_obj = date.fromisoformat(end_str[:10])
             if data_final_obj > data_inicial_obj:
                 data_final_obj = data_final_obj - timedelta(days=1)
-            # --- FIM DA CORREÇÃO ---
 
             nomeEvento = event.get('summary', 'Evento do Google')
             descricao = event.get('description', '')
@@ -448,6 +493,10 @@ def import_google_calendar():
     except HttpError as error:
         print(f'Ocorreu um erro: {error}')
         return "Ocorreu um erro ao buscar os eventos do Google Agenda.", 500
+    except Exception as e:
+        print(f"Erro Inesperado na importação: {e}")
+        return "Ocorreu um erro inesperado durante a importação.", 500
+
 
 # Inicia o servidor Flask
 if __name__ == '__main__':
