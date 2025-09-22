@@ -168,6 +168,40 @@ textarea{
     border: 1px solid #ccc;
 }
 
+.checkbox-horizontal-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px; /* Espaço entre os itens */
+  padding: 10px 0;
+  margin-bottom: 15px;
+}
+
+.checkbox-horizontal-group .checkbox-item {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-horizontal-group input[type="checkbox"] {
+  margin: 0 8px 0 0; /* Espaço à direita da caixa */
+  width: auto; 
+  height: auto;
+}
+
+.checkbox-horizontal-group label {
+  margin: 0;
+  white-space: nowrap;
+  font-weight: normal;
+  /* Redefine estilos de label para evitar conflitos */
+  position: static;
+  top: auto;
+  left: auto;
+  pointer-events: auto;
+  transition: none;
+  font-size: 1rem;
+  color: white;
+}
+
 @media (max-width: 992px) { /* Para tablets e telas menores que desktops */
     .container-flex {
         flex-direction: column; /* Empilha o formulário e o calendário */
@@ -299,3 +333,4 @@ textarea{
         padding: 6px;
     }
 }
+

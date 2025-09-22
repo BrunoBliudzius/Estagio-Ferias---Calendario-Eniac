@@ -48,6 +48,22 @@
 
             <label for="CorEvento">Cor do Evento:</label>
             <input type="color" id="CorEvento" name="eventColor" value="#3788d8" />
+            
+            <label>Visível para:</label>
+            <div class="checkbox-horizontal-group">
+              <div>
+                <input type="checkbox" name="evento_tipo" value="aluno" id="tipo_aluno">
+                <label for="tipo_aluno">Aluno</label>
+              </div>
+              <div>
+                <input type="checkbox" name="evento_tipo" value="externo" id="tipo_externo">
+                <label for="tipo_externo">Externo</label>
+              </div>
+              <div>
+                <input type="checkbox" name="evento_tipo" value="admin" id="tipo_admin">
+                <label for="tipo_admin">Admin</label>
+              </div>
+            </div>
 
             <label for="ImagemEvento">Repetir todo ano na mesma semana:</label>
 
@@ -120,6 +136,38 @@
 
               <label for="editDescricao"><strong>Descrição:</strong></label>
               <textarea id="editDescricao" class="form-control" rows="2"></textarea>
+              
+              <label>Visível para:</label>
+              <div class="checkbox-horizontal-group">
+                <div class="checkbox-item">
+                  <input type="checkbox" name="evento_tipo" value="aluno" id="tipo_aluno">
+                  <label for="tipo_aluno">Aluno</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" name="evento_tipo" value="externo" id="tipo_externo">
+                  <label for="tipo_externo">Externo</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" name="evento_tipo" value="admin" id="tipo_admin">
+                  <label for="tipo_admin">Admin</label>
+                </div>
+              </div>
+              
+              <label><strong>Visível para:</strong></label>
+              <div class="checkbox-horizontal-group">
+                <div class="checkbox-item">
+                  <input type="checkbox" name="evento_tipo" value="aluno" id="edit_tipo_aluno">
+                  <label for="edit_tipo_aluno">Aluno</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" name="evento_tipo" value="externo" id="edit_tipo_externo">
+                  <label for="edit_tipo_externo">Externo</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" name="evento_tipo" value="admin" id="edit_tipo_admin">
+                  <label for="edit_tipo_admin">Admin</label>
+                </div>
+              </div>
 
               <label for="editImagemEvento"><strong>Imagem do Evento:</strong></label>
               <input type="file" id="editImagemEvento" class="form-control" name="imagem" accept="image/*" />

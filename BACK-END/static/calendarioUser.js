@@ -10,55 +10,83 @@ document.addEventListener("DOMContentLoaded", async function () {
     let calendar = new FullCalendar.Calendar(calendarEl, {
         eventClick: function (info) {
             const event = info.event;
-            idEventoSelecionado = event.id;
-
-            // Agora, sempre abra o modal de visualização
-            const viewModal = new bootstrap.Modal(document.getElementById("viewEventModal")); // APONTE PARA O ID DO SEU MODAL DE VISUALIZAÇÃO
-
-            // Preencha os campos do modal de visualização
+        
+            const viewModal = new bootstrap.Modal(document.getElementById("viewEventModal"));
+        
+            // --- PREENCHIMENTO DOS CAMPOS DO MODAL ---
+        
+            // Título do Evento (para todos)
             document.querySelector("#viewEventModal .modal-title").textContent = event.title;
-            document.querySelector("#viewEventModal .modal-body .event-date").innerHTML = `<strong>Data:</strong> ${event.start.toLocaleDateString()}`;
-            document.querySelector("#viewEventModal .modal-body .event-description").innerHTML = `<strong>Descrição:</strong> ${event.extendedProps.descricao}`;
-
-            // Lógica para imagem
-            const imgContainer = document.querySelector("#viewEventModal .modal-body .event-image-container");
-            if (event.extendedProps.imagem_url) {
-                let imgEl = document.getElementById("view-modal-img-evento");
-                if (!imgEl) {
-                    // Crie a tag img se ela ainda não existir
-                    imgEl = document.createElement("img");
-                    imgEl.id = "view-modal-img-evento";
-                    imgEl.style.maxWidth = "100%";
-                    imgEl.style.marginTop = "10px";
-                    imgContainer.appendChild(imgEl);
-                }
-                imgEl.src = event.extendedProps.imagem_url;
-                imgEl.style.display = "block"; // Garante que a imagem é visível
-            } else {
-                // Se não houver imagem, esconda o elemento img se ele existir
-                const imgEl = document.getElementById("view-modal-img-evento");
-                if (imgEl) {
-                    imgEl.style.display = "none";
-                }
+            
+            // Datas do Evento (com a nova lógica)
+            const startDate = event.start;
+            let endDate = event.end ? new Date(event.end) : null;
+            let dateString = '';
+        
+            // FullCalendar's end date is exclusive. Para eventos de dia inteiro, ele aponta para a manhã do dia seguinte.
+            // Então, subtraímos um dia para obter a data final real e inclusiva.
+            if (endDate) {
+                endDate.setDate(endDate.getDate() - 1);
             }
-
-
-            // Exibe o nome do usuário que alterou o evento SOMENTE se for admin
+        
+            // Verifica se o evento dura apenas um dia
+            if (!endDate || startDate.toDateString() === endDate.toDateString()) {
+                dateString = `<strong>Data:</strong> ${startDate.toLocaleDateString()}`;
+            } else {
+                dateString = `<strong>Data de Início:</strong> ${startDate.toLocaleDateString()}<br><strong>Data Final:</strong> ${endDate.toLocaleDateString()}`;
+            }
+            document.querySelector("#viewEventModal .modal-body .event-date").innerHTML = dateString;
+        
+            // Descrição (para todos)
+            document.querySelector("#viewEventModal .modal-body .event-description").innerHTML = `<strong>Descrição:</strong> ${event.extendedProps.descricao || ""}`;
+        
+            // --- INFORMAÇÕES EXCLUSIVAS PARA ADMIN ---
             const usuarioEl = document.getElementById("modal-usuario");
-            if (isAdmin && event.extendedProps.usuario_nome) {
-                usuarioEl.innerHTML = `<strong>Última alteração por:</strong> ${event.extendedProps.usuario_nome}`;
+            const visibilityEl = document.querySelector("#viewEventModal .modal-body .event-visibility");
+        
+            if (isAdmin) {
+                // Mostra quem alterou por último
+                if (event.extendedProps.usuario_nome) {
+                    usuarioEl.innerHTML = `<strong>Última alteração por:</strong> ${event.extendedProps.usuario_nome}`;
+                    usuarioEl.style.display = 'block';
+                } else {
+                    usuarioEl.style.display = 'none';
+                }
+        
+                // Mostra para quem o evento é visível
+                if (event.extendedProps.evento_tipo) {
+                    const tipos = event.extendedProps.evento_tipo.split(',').map(tipo => tipo.charAt(0).toUpperCase() + tipo.slice(1)).join(', ');
+                    visibilityEl.innerHTML = `<strong>Visível para:</strong> ${tipos}`;
+                    visibilityEl.style.display = 'block';
+                } else {
+                    visibilityEl.style.display = 'none';
+                }
             } else {
-                usuarioEl.innerHTML = "";
+                // Esconde os campos se não for admin
+                usuarioEl.style.display = 'none';
+                visibilityEl.style.display = 'none';
             }
-
+        
+            // Lógica da Imagem (para todos)
+            const imgContainer = document.querySelector("#viewEventModal .modal-body .event-image-container");
+            imgContainer.innerHTML = ''; // Limpa imagens anteriores
+            if (event.extendedProps.imagem_url) {
+                const imgEl = document.createElement("img");
+                imgEl.id = "view-modal-img-evento";
+                imgEl.src = event.extendedProps.imagem_url;
+                imgEl.style.maxWidth = "100%";
+                imgEl.style.marginTop = "10px";
+                imgContainer.appendChild(imgEl);
+            }
+        
             viewModal.show(); // Exibe o modal
         },
         height: "auto",
         initialView: "dayGridMonth",
         firstDay: 0,
         locale: "pt-br",
-        weekNumbers: true,              // ativa a numeração das semanas
-        weekNumbersWithinDays: false,   // faz aparecer na coluna lateral
+        weekNumbers: true,
+        weekNumbersWithinDays: false,
         weekNumberContent: function(arg) {
             return { html: 'S' + arg.num };
         },        
@@ -109,7 +137,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             extendedProps: {
                 descricao: evt.descricao || "",
                 imagem_url: evt.imagem_url || null,
-                usuario_nome: evt.usuario_nome || null
+                usuario_nome: evt.usuario_nome || null,
+                evento_tipo: evt.evento_tipo || 'externo'
             }
         });
     });

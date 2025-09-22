@@ -182,6 +182,7 @@ def login():
             session['usuario_id'] = user['id']
             session['usuario_nome'] = user['usuario']
             session['user_role'] = user.get('role', 'user')
+            session['tipo_usuario'] = user.get('tipo_usuario', 'externo') # Adicionado
             return redirect(url_for('novo_evento_page'))
         else:
             return "Usuário ou senha inválidos", 401
@@ -243,6 +244,7 @@ def formatar_evento(row, is_admin=False):
         'descricao': row['descricao'],
         'eventColor': row['eventColor'],
         'imagem_url': imagem_url,
+        'evento_tipo': row.get('evento_tipo', 'externo') # Adicionado
     }
     if is_admin:
         evento['usuario_nome'] = row.get('usuario')
@@ -257,9 +259,18 @@ def uploaded_file(filename):
 @app.route('/datas', methods=['GET'])
 def obter_eventos():
     is_admin = 'user_role' in session and session['user_role'] == 'admin'
+    tipo_usuario = session.get('tipo_usuario', 'externo')
+
     conexao = get_db_connection()
     cursor = conexao.cursor()
-    cursor.execute('SELECT d.*, u.usuario FROM dados d LEFT JOIN usuarios u ON d.usuario_id = u.id')
+
+    if tipo_usuario == 'admin':
+        cursor.execute('SELECT d.*, u.usuario FROM dados d LEFT JOIN usuarios u ON d.usuario_id = u.id')
+    else:
+        # Usando FIND_IN_SET para buscar o tipo de usuário na string de evento_tipo
+        cursor.execute("SELECT d.*, u.usuario FROM dados d LEFT JOIN usuarios u ON d.usuario_id = u.id WHERE FIND_IN_SET(%s, d.evento_tipo)", (tipo_usuario,))
+
+
     rows = cursor.fetchall()
     conexao.close()
     eventos = [formatar_evento(row, is_admin) for row in rows]
@@ -283,7 +294,7 @@ def filtrar_eventos():
 # Rota POST para criar um novo evento
 @app.route('/datas', methods=['POST'])
 def criar_evento():
-    if 'usuario_id' not in session:
+    if 'usuario_id' not in session or session.get('tipo_usuario') != 'admin':
         return jsonify({'erro': 'Não autorizado'}), 401
 
     usuario_id = session['usuario_id']
@@ -293,6 +304,9 @@ def criar_evento():
     descricao = request.form.get('descricao')
     eventColor = request.form.get('eventColor')
     repetir = request.form.get('repetir_anualmente', '0') == '1'
+    evento_tipos = request.form.getlist('evento_tipo')
+    evento_tipo_str = ",".join(evento_tipos)
+
     
     # --- CORREÇÃO DA DATA FINAL EXCLUSIVA ---
     data_inicial_obj = date.fromisoformat(dataInicial_str[:10])
@@ -341,9 +355,9 @@ def criar_evento():
 
     # Inserção do evento base com a data final CORRIGIDA
     cursor.execute("""
-    INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana, repetir_anualmente)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """, (nomeEvento, dataInicial_str, dataFinal_corrigida_str, descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana, repetir))
+    INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana, repetir_anualmente, evento_tipo)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (nomeEvento, dataInicial_str, dataFinal_corrigida_str, descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana, repetir, evento_tipo_str))
     
     if repetir:
         duracao_evento = data_final_obj - data_inicial_obj
@@ -352,24 +366,27 @@ def criar_evento():
             data_ini_obj = datetime.fromisocalendar(ano, semana_do_ano, dia_da_semana)
             data_fim_obj = data_ini_obj + duracao_evento
             cursor.execute("""
-                INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana, repetir_anualmente)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 1)
-            """, (nomeEvento, data_ini_obj.date(), data_fim_obj.date(), descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana))
+                INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana, repetir_anualmente, evento_tipo)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 1, %s)
+            """, (nomeEvento, data_ini_obj.date(), data_fim_obj.date(), descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana, evento_tipo_str))
 
     conexao.commit()
     conexao.close()
     return jsonify({'mensagem': 'Evento criado com sucesso'}), 201
 
-# Rota PUT para atualizar um evento (código mantido)
+# Rota PUT para atualizar um evento
 @app.route('/datas/<int:event_id>', methods=['PUT'])
 def atualizar_evento(event_id):
-    if 'usuario_id' not in session: return jsonify({'erro': 'Não autorizado'}), 401
+    if 'usuario_id' not in session or session.get('tipo_usuario') != 'admin':
+        return jsonify({'erro': 'Não autorizado'}), 401
     usuario_id = session['usuario_id']
     nomeEvento = request.form.get('nomeEvento')
     dataInicial = request.form.get('dataInicial')
     dataFinal = request.form.get('dataFinal')
     descricao = request.form.get('descricao')
     eventColor = request.form.get('eventColor')
+    evento_tipos = request.form.getlist('evento_tipo')
+    evento_tipo_str = ",".join(evento_tipos)
     conexao = get_db_connection()
     cursor = conexao.cursor()
     cursor.execute("SELECT * FROM dados WHERE id = %s", (event_id,))
@@ -386,14 +403,16 @@ def atualizar_evento(event_id):
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
             file.save(filepath)
             imagem_url = unique_name
-    cursor.execute("UPDATE dados SET nomeEvento = %s, dataInicial = %s, dataFinal = %s, descricao = %s, eventColor = %s, imagem_url = %s, usuario_id = %s WHERE id = %s", (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id, event_id))
+    cursor.execute("UPDATE dados SET nomeEvento = %s, dataInicial = %s, dataFinal = %s, descricao = %s, eventColor = %s, imagem_url = %s, usuario_id = %s, evento_tipo = %s WHERE id = %s", (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id, evento_tipo_str, event_id))
     conexao.commit()
     conexao.close()
     return jsonify({'mensagem': 'Evento atualizado com sucesso'})
 
-# Rota DELETE para excluir um evento (código mantido)
+# Rota DELETE para excluir um evento
 @app.route('/datas/<int:event_id>', methods=['DELETE'])
 def deletar_evento(event_id):
+    if 'usuario_id' not in session or session.get('tipo_usuario') != 'admin':
+        return jsonify({'erro': 'Não autorizado'}), 401
     conexao = get_db_connection()
     cursor = conexao.cursor()
     cursor.execute("DELETE FROM dados WHERE id = %s", (event_id,))
