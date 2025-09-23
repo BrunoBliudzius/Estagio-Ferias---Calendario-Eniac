@@ -2,10 +2,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     let calendarEl = document.getElementById("calendar");
     
-    // Faz a chamada para a nova rota que verifica o status de administrador
     const loginRes = await fetch("http://localhost:5000/check-admin-status");
     const loginStatus = await loginRes.json();
-    const isAdmin = loginStatus.isAdmin; // Usa a propriedade 'isAdmin' da resposta
+    const isAdmin = loginStatus.isAdmin;
 
     let calendar = new FullCalendar.Calendar(calendarEl, {
         eventClick: function (info) {
@@ -13,48 +12,31 @@ document.addEventListener("DOMContentLoaded", async function () {
         
             const viewModal = new bootstrap.Modal(document.getElementById("viewEventModal"));
         
-            // --- PREENCHIMENTO DOS CAMPOS DO MODAL ---
-        
-            // Título do Evento (para todos)
             document.querySelector("#viewEventModal .modal-title").textContent = event.title;
             
-            // ==================================================================
-            // INÍCIO DA LÓGICA DE DATA ATUALIZADA
-            // ==================================================================
             const startDate = event.start;
-            let endDate = event.end; // A data final original do FullCalendar
+            let endDate = event.end;
             let dateString = '';
         
-            // O FullCalendar torna a data final exclusiva para eventos de dia inteiro.
-            // Ex: um evento de 2 dias (29 e 30) terá end = 31.
-            // Precisamos subtrair um dia para obter a data final real e inclusiva.
             let inclusiveEndDate = null;
             if (endDate) {
                 inclusiveEndDate = new Date(endDate);
                 inclusiveEndDate.setDate(inclusiveEndDate.getDate() - 1);
             }
         
-            // Verifica se o evento dura apenas um dia.
-            // A condição é: não há data final, OU a data de início é igual à data final inclusiva.
             if (!inclusiveEndDate || startDate.toDateString() === inclusiveEndDate.toDateString()) {
                 dateString = `<strong>Data:</strong> ${startDate.toLocaleDateString()}`;
             } else {
                 dateString = `<strong>Data de Início:</strong> ${startDate.toLocaleDateString()}<br><strong>Data Final:</strong> ${inclusiveEndDate.toLocaleDateString()}`;
             }
             document.querySelector("#viewEventModal .modal-body .event-date").innerHTML = dateString;
-            // ==================================================================
-            // FIM DA LÓGICA DE DATA ATUALIZADA
-            // ==================================================================
         
-            // Descrição (para todos)
             document.querySelector("#viewEventModal .modal-body .event-description").innerHTML = `<strong>Descrição:</strong> ${event.extendedProps.descricao || ""}`;
         
-            // --- INFORMAÇÕES EXCLUSIVAS PARA ADMIN ---
             const usuarioEl = document.getElementById("modal-usuario");
             const visibilityEl = document.querySelector("#viewEventModal .modal-body .event-visibility");
         
             if (isAdmin) {
-                // Mostra quem alterou por último
                 if (event.extendedProps.usuario_nome) {
                     usuarioEl.innerHTML = `<strong>Última alteração por:</strong> ${event.extendedProps.usuario_nome}`;
                     usuarioEl.style.display = 'block';
@@ -62,7 +44,6 @@ document.addEventListener("DOMContentLoaded", async function () {
                     usuarioEl.style.display = 'none';
                 }
         
-                // Mostra para quem o evento é visível
                 if (event.extendedProps.evento_tipo) {
                     const tipos = event.extendedProps.evento_tipo.split(',').map(tipo => tipo.charAt(0).toUpperCase() + tipo.slice(1)).join(', ');
                     visibilityEl.innerHTML = `<strong>Visível para:</strong> ${tipos}`;
@@ -71,14 +52,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                     visibilityEl.style.display = 'none';
                 }
             } else {
-                // Esconde os campos se não for admin
                 usuarioEl.style.display = 'none';
                 visibilityEl.style.display = 'none';
             }
         
-            // Lógica da Imagem (para todos)
             const imgContainer = document.querySelector("#viewEventModal .modal-body .event-image-container");
-            imgContainer.innerHTML = ''; // Limpa imagens anteriores
+            imgContainer.innerHTML = '';
             if (event.extendedProps.imagem_url) {
                 const imgEl = document.createElement("img");
                 imgEl.id = "view-modal-img-evento";
@@ -88,9 +67,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                 imgContainer.appendChild(imgEl);
             }
         
-            viewModal.show(); // Exibe o modal
+            viewModal.show();
         },
-        height: "auto",
+        // ==========================================================
+        // ALTURA DO CALENDÁRIO AJUSTADA AQUI
+        // ==========================================================
+        height: "100%", // Altera de 'auto' para '100%'
         initialView: "dayGridMonth",
         firstDay: 0,
         locale: "pt-br",
