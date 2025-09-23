@@ -46,32 +46,30 @@
     color: #6c757d;
 }
 
+/* ================================================= */
+/* NOVA REGRA ADICIONADA PARA O TÍTULO DO CALENDÁRIO */
+/* ================================================= */
+.fc-toolbar-title {
+    text-transform: uppercase;
+    font-size: 1.6em; /* Aumenta um pouco o tamanho para dar mais destaque */
+}
+/* ================================================= */
+
+
 .ia-btn {
   position: fixed;
   bottom: 30px;
   right: 30px;
   z-index: 1050;
-
-  /* --- Estilo do Círculo --- */
   width: 60px;
   height: 60px;
   border-radius: 50%;
   border: none;
   padding: 0;
-  
-  /* --- A Melhor Abordagem para a Imagem --- */
   background-image: url('/static/imagens/robot-assistant_10087869.png');
-  
-  /* Faz a imagem ocupar 85% do espaço, criando uma margem */
   background-size: 85%; 
-  
-  /* Garante que a imagem não se repita */
   background-repeat: no-repeat; 
-  
-  /* Centraliza a imagem no meio do botão */
   background-position: center; 
-
-  /* --- Efeitos Visuais --- */
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease-in-out;
 }
@@ -81,7 +79,6 @@
   box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
   cursor: pointer;
 }
-
 
 @media (max-width: 768px) {
     .divCabecalho {
@@ -119,4 +116,59 @@
         font-size: 0.9em; 
         padding: 8px 12px;
     }
+}
+
+.modal-content {
+  background-color: #054161;
+  color: white;
+  border-radius: 15px;
+  border: none;
+}
+
+.modal-header {
+  border-bottom: 1px solid #ffe466;
+}
+
+.modal-header .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.modal-body fieldset {
+  border: 3px solid #ffe466;
+  text-align: left;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.modal-footer {
+  border-top: 1px solid #ffe466;
+}
+
+.modal-footer .btn {
+  border-radius: 10px;
+  font-weight: bold;
+  padding: 10px 20px;
+}
+
+.modal-footer .btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+.modal-footer .btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+#chatModal .modal-content {
+    background-color: #fff;
+    color: #212529;
+}
+#chatModal .modal-header {
+    border-bottom: 1px solid #dee2e6;
+}
+#chatModal .modal-header .btn-close {
+    filter: none;
+}
+#chatModal .modal-footer {
+    border-top: 1px solid #dee2e6;
 }

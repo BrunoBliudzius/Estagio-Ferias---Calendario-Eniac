@@ -305,24 +305,23 @@ def criar_evento():
     eventColor = request.form.get('eventColor')
     repetir = request.form.get('repetir_anualmente', '0') == '1'
     evento_tipos = request.form.getlist('evento_tipo')
+
+    if not evento_tipos:
+        return jsonify({'erro': 'Selecione ao menos uma opção de visibilidade (Aluno, Externo ou Admin).'}), 400
+    
     evento_tipo_str = ",".join(evento_tipos)
 
-    
-    # --- CORREÇÃO DA DATA FINAL EXCLUSIVA ---
     data_inicial_obj = date.fromisoformat(dataInicial_str[:10])
     data_final_obj = date.fromisoformat(dataFinal_str[:10])
     
-    # Se a data final for maior que a inicial, subtrai um dia para torná-la inclusiva.
     if data_final_obj > data_inicial_obj:
         data_final_obj = data_final_obj - timedelta(days=1)
     
     dataFinal_corrigida_str = data_final_obj.isoformat()
-    # --- FIM DA CORREÇÃO ---
 
     semana_do_ano = data_inicial_obj.isocalendar()[1]
     dia_da_semana = data_inicial_obj.isoweekday()
 
-    # Enviar email (código mantido)
     remetente = "brunosilvabliu@gmail.com"
     emails_raw = request.form.get('email')
     assunto = "Convite para o Evento"
@@ -353,7 +352,6 @@ def criar_evento():
     conexao = get_db_connection()
     cursor = conexao.cursor()
 
-    # Inserção do evento base com a data final CORRIGIDA
     cursor.execute("""
     INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, imagem_url, usuario_id, semana_do_ano, dia_da_semana, repetir_anualmente, evento_tipo)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -386,6 +384,14 @@ def atualizar_evento(event_id):
     descricao = request.form.get('descricao')
     eventColor = request.form.get('eventColor')
     evento_tipos = request.form.getlist('evento_tipo')
+
+    # ==========================================================
+    # ALTERAÇÃO: Validação de Visibilidade na Atualização
+    # ==========================================================
+    if not evento_tipos:
+        return jsonify({'erro': 'É necessário manter ao menos uma opção de visibilidade.'}), 400
+    # ==========================================================
+
     evento_tipo_str = ",".join(evento_tipos)
     conexao = get_db_connection()
     cursor = conexao.cursor()
@@ -420,7 +426,7 @@ def deletar_evento(event_id):
     conexao.close()
     return jsonify({'mensagem': 'Evento excluído com sucesso'})
     
-# Rota para iniciar a autenticação com o Google (código mantido)
+# Rota para iniciar a autenticação com o Google
 @app.route('/google-login')
 def google_login():
     client_config = {"web": {"client_id": os.getenv("GOOGLE_CLIENT_ID"), "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"), "auth_uri": "https://accounts.google.com/o/oauth2/auth", "token_uri": "https://oauth2.googleapis.com/token", "redirect_uris": ["http://localhost:5000/google-callback"]}}
@@ -430,7 +436,7 @@ def google_login():
     session['state'] = state
     return redirect(authorization_url)
 
-# Rota de callback do Google (código mantido)
+# Rota de callback do Google
 @app.route('/google-callback')
 def google_callback():
     state = session['state']
@@ -487,11 +493,11 @@ def import_google_calendar():
             google_id = event['id']
             semana_do_ano = data_inicial_obj.isocalendar()[1]
             dia_da_semana = data_inicial_obj.isoweekday()
-
+            
             cursor.execute("""
-                INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, usuario_id, google_event_id, semana_do_ano, dia_da_semana, repetir_anualmente)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (nomeEvento, data_inicial_obj, data_final_obj, descricao, None, current_user_id, google_id, semana_do_ano, dia_da_semana, is_recurring))
+                INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, usuario_id, google_event_id, semana_do_ano, dia_da_semana, repetir_anualmente, evento_tipo)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (nomeEvento, data_inicial_obj, data_final_obj, descricao, None, current_user_id, google_id, semana_do_ano, dia_da_semana, is_recurring, 'admin'))
 
             if is_recurring:
                 duracao_evento = data_final_obj - data_inicial_obj
@@ -500,9 +506,9 @@ def import_google_calendar():
                     nova_data_ini_obj = datetime.fromisocalendar(ano, semana_do_ano, dia_da_semana)
                     nova_data_fim_obj = nova_data_ini_obj + duracao_evento
                     cursor.execute("""
-                        INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, usuario_id, google_event_id, semana_do_ano, dia_da_semana, repetir_anualmente)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 1)
-                    """, (nomeEvento, nova_data_ini_obj.date(), nova_data_fim_obj.date(), descricao, None, current_user_id, google_id, semana_do_ano, dia_da_semana))
+                        INSERT INTO dados (nomeEvento, dataInicial, dataFinal, descricao, eventColor, usuario_id, google_event_id, semana_do_ano, dia_da_semana, repetir_anualmente, evento_tipo)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 1, %s)
+                    """, (nomeEvento, nova_data_ini_obj.date(), nova_data_fim_obj.date(), descricao, None, current_user_id, google_id, semana_do_ano, dia_da_semana, 'admin'))
         
         conexao.commit()
         cursor.close()

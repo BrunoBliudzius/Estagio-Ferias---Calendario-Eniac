@@ -18,24 +18,33 @@ document.addEventListener("DOMContentLoaded", async function () {
             // Título do Evento (para todos)
             document.querySelector("#viewEventModal .modal-title").textContent = event.title;
             
-            // Datas do Evento (com a nova lógica)
+            // ==================================================================
+            // INÍCIO DA LÓGICA DE DATA ATUALIZADA
+            // ==================================================================
             const startDate = event.start;
-            let endDate = event.end ? new Date(event.end) : null;
+            let endDate = event.end; // A data final original do FullCalendar
             let dateString = '';
         
-            // FullCalendar's end date is exclusive. Para eventos de dia inteiro, ele aponta para a manhã do dia seguinte.
-            // Então, subtraímos um dia para obter a data final real e inclusiva.
+            // O FullCalendar torna a data final exclusiva para eventos de dia inteiro.
+            // Ex: um evento de 2 dias (29 e 30) terá end = 31.
+            // Precisamos subtrair um dia para obter a data final real e inclusiva.
+            let inclusiveEndDate = null;
             if (endDate) {
-                endDate.setDate(endDate.getDate() - 1);
+                inclusiveEndDate = new Date(endDate);
+                inclusiveEndDate.setDate(inclusiveEndDate.getDate() - 1);
             }
         
-            // Verifica se o evento dura apenas um dia
-            if (!endDate || startDate.toDateString() === endDate.toDateString()) {
+            // Verifica se o evento dura apenas um dia.
+            // A condição é: não há data final, OU a data de início é igual à data final inclusiva.
+            if (!inclusiveEndDate || startDate.toDateString() === inclusiveEndDate.toDateString()) {
                 dateString = `<strong>Data:</strong> ${startDate.toLocaleDateString()}`;
             } else {
-                dateString = `<strong>Data de Início:</strong> ${startDate.toLocaleDateString()}<br><strong>Data Final:</strong> ${endDate.toLocaleDateString()}`;
+                dateString = `<strong>Data de Início:</strong> ${startDate.toLocaleDateString()}<br><strong>Data Final:</strong> ${inclusiveEndDate.toLocaleDateString()}`;
             }
             document.querySelector("#viewEventModal .modal-body .event-date").innerHTML = dateString;
+            // ==================================================================
+            // FIM DA LÓGICA DE DATA ATUALIZADA
+            // ==================================================================
         
             // Descrição (para todos)
             document.querySelector("#viewEventModal .modal-body .event-description").innerHTML = `<strong>Descrição:</strong> ${event.extendedProps.descricao || ""}`;

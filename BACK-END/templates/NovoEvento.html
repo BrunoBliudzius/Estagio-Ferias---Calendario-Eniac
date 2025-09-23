@@ -72,11 +72,10 @@
               Escolher uma imagem para o evento:
             </label>
             <input type="file" id="ImagemEvento" name="imagem" accept="image/*" />
-            <input type="submit" value="Cadastrar Evento" id="cadastrarEvento" style= />
-            <button id="voltar">
-              <a href="http://localhost:5000/calendario">Ir para calendário</a>
-            </button> <br>
-            <button type="button" class="btn-custom btn-google"
+            
+            <input type="submit" value="Cadastrar Evento" class="btn-form-action" />
+            <a href="http://localhost:5000/calendario" class="btn-form-action">Ir para calendário</a>
+            <button type="button" class="btn-form-action"
               onclick="window.location.href='{{ url_for('google_login') }}'">
               <i class="bi bi-google"></i> Importar do Google Agenda
             </button>
@@ -95,8 +94,10 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
           </div>
           <div class="modal-body">
-            <p></p>
-            <p id="modal-usuario" class="mt-2"></p>
+            <fieldset>
+                <p></p>
+                <p id="modal-usuario" class="mt-2"></p>
+            </fieldset>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-danger" onclick="FuncaoDeletar()">
@@ -122,55 +123,41 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-              <label for="editNomeEvento"><strong>Nome:</strong></label>
-              <input type="text" id="editNomeEvento" class="form-control" required />
+              <fieldset>
+                <label for="editNomeEvento"><strong>Nome:</strong></label>
+                <input type="text" id="editNomeEvento" class="form-control" required />
 
-              <label for="editDataInicial"><strong>Data Inicial:</strong></label>
-              <input type="date" id="editDataInicial" class="form-control" required />
+                <label for="editDataInicial"><strong>Data Inicial:</strong></label>
+                <input type="date" id="editDataInicial" class="form-control" required />
 
-              <label for="editDataFinal"><strong>Data Final:</strong></label>
-              <input type="date" id="editDataFinal" class="form-control" required />
+                <label for="editDataFinal"><strong>Data Final:</strong></label>
+                <input type="date" id="editDataFinal" class="form-control" required />
 
-              <label for="editCorEvento"><strong>Cor:</strong></label>
-              <input type="color" id="editCorEvento" class="form-control" />
+                <label for="editCorEvento"><strong>Cor:</strong></label>
+                <input type="color" id="editCorEvento" class="form-control" />
 
-              <label for="editDescricao"><strong>Descrição:</strong></label>
-              <textarea id="editDescricao" class="form-control" rows="2"></textarea>
-              
-              <label>Visível para:</label>
-              <div class="checkbox-horizontal-group">
-                <div class="checkbox-item">
-                  <input type="checkbox" name="evento_tipo" value="aluno" id="tipo_aluno">
-                  <label for="tipo_aluno">Aluno</label>
+                <label for="editDescricao"><strong>Descrição:</strong></label>
+                <textarea id="editDescricao" class="form-control" rows="2"></textarea>
+                
+                <label class="mt-2"><strong>Visível para:</strong></label>
+                <div class="checkbox-horizontal-group">
+                  <div class="checkbox-item">
+                    <input type="checkbox" name="evento_tipo" value="aluno" id="edit_tipo_aluno">
+                    <label for="edit_tipo_aluno" class="form-check-label">Aluno</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" name="evento_tipo" value="externo" id="edit_tipo_externo">
+                    <label for="edit_tipo_externo">Externo</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" name="evento_tipo" value="admin" id="edit_tipo_admin">
+                    <label for="edit_tipo_admin">Admin</label>
+                  </div>
                 </div>
-                <div class="checkbox-item">
-                  <input type="checkbox" name="evento_tipo" value="externo" id="tipo_externo">
-                  <label for="tipo_externo">Externo</label>
-                </div>
-                <div class="checkbox-item">
-                  <input type="checkbox" name="evento_tipo" value="admin" id="tipo_admin">
-                  <label for="tipo_admin">Admin</label>
-                </div>
-              </div>
-              
-              <label><strong>Visível para:</strong></label>
-              <div class="checkbox-horizontal-group">
-                <div class="checkbox-item">
-                  <input type="checkbox" name="evento_tipo" value="aluno" id="edit_tipo_aluno">
-                  <label for="edit_tipo_aluno">Aluno</label>
-                </div>
-                <div class="checkbox-item">
-                  <input type="checkbox" name="evento_tipo" value="externo" id="edit_tipo_externo">
-                  <label for="edit_tipo_externo">Externo</label>
-                </div>
-                <div class="checkbox-item">
-                  <input type="checkbox" name="evento_tipo" value="admin" id="edit_tipo_admin">
-                  <label for="edit_tipo_admin">Admin</label>
-                </div>
-              </div>
 
-              <label for="editImagemEvento"><strong>Imagem do Evento:</strong></label>
-              <input type="file" id="editImagemEvento" class="form-control" name="imagem" accept="image/*" />
+                <label for="editImagemEvento" class="mt-2"><strong>Imagem do Evento:</strong></label>
+                <input type="file" id="editImagemEvento" class="form-control" name="imagem" accept="image/*" />
+              </fieldset>
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-success">

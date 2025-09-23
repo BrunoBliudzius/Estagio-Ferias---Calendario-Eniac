@@ -38,12 +38,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
           </div>
           <div class="modal-body">
-            <p class="event-date"></p>
-            <p class="event-description"></p>
-            <p class="event-visibility" style="font-weight: bold;"></p>
-            <div class="event-image-container">
-            </div>
-            <p id="modal-usuario" class="mt-2"></p>
+            <fieldset>
+                <p class="event-date"></p>
+                <p class="event-description"></p>
+                <p class="event-visibility" style="font-weight: bold;"></p>
+                <div class="event-image-container">
+                </div>
+                <p id="modal-usuario" class="mt-2"></p>
+            </fieldset>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -51,6 +53,7 @@
         </div>
       </div>
     </div>
+    
    <button type="button" class="btn btn-primary ia-btn" data-bs-toggle="modal" data-bs-target="#chatModal"></button>
 
     <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
@@ -81,10 +84,9 @@
     </div>
   </div>
   <script>
-    // Adiciona um listener para a tecla 'Enter' no campo de pergunta
     document.getElementById('pergunta').addEventListener('keypress', function (event) {
       if (event.key === 'Enter') {
-        event.preventDefault(); // Impede o comportamento padrão do Enter (como submeter um formulário)
+        event.preventDefault();
         perguntarIA();
       }
     });
@@ -93,7 +95,6 @@
       const perguntaInput = document.getElementById("pergunta");
       const respostaDiv = document.getElementById("resposta");
       const btnEnviar = document.getElementById("btnEnviarPergunta");
-
       const pergunta = perguntaInput.value;
 
       if (!pergunta.trim()) {
@@ -101,28 +102,23 @@
         return;
       }
 
-      // --- MELHORIA 1: Feedback de Carregamento e Desabilitar Botão ---
       respostaDiv.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Pensando...';
       btnEnviar.disabled = true;
       perguntaInput.disabled = true;
 
       try {
-        // Chamada para o Flask
         const resp = await fetch("http://localhost:5000/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pergunta: pergunta }) // Envia o valor da variável
+          body: JSON.stringify({ pergunta: pergunta })
         });
 
-        // Verifica se a resposta do servidor foi bem-sucedida
         if (!resp.ok) {
-          // Se não foi, lança um erro com a mensagem de status
           throw new Error(`Erro do servidor: ${resp.status} ${resp.statusText}`);
         }
 
         const data = await resp.json();
 
-        // Verifica se a resposta da API contém um erro (vindo do nosso backend)
         if (data.erro) {
           respostaDiv.innerText = data.erro;
         } else {
@@ -130,12 +126,9 @@
         }
 
       } catch (error) {
-        // --- MELHORIA 2: Tratamento de Erro ---
         console.error("Falha ao chamar a API:", error);
         respostaDiv.innerText = "Desculpe, não foi possível obter uma resposta. Verifique sua conexão ou tente novamente mais tarde.";
       } finally {
-        // --- MELHORIA 3: Reabilitar o Botão ---
-        // O bloco 'finally' sempre executa, seja em caso de sucesso ou erro.
         btnEnviar.disabled = false;
         perguntaInput.disabled = false;
       }
@@ -143,4 +136,4 @@
   </script>
 </body>
 
-</html> 
+</html>
