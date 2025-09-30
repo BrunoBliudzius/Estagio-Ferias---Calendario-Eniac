@@ -182,8 +182,13 @@ def login():
             session['usuario_id'] = user['id']
             session['usuario_nome'] = user['usuario']
             session['user_role'] = user.get('role', 'user')
-            session['tipo_usuario'] = user.get('tipo_usuario', 'externo') # Adicionado
-            return redirect(url_for('novo_evento_page'))
+            tipo_usuario = user.get('tipo_usuario', 'externo')
+            session['tipo_usuario'] = tipo_usuario
+
+            if tipo_usuario == 'aluno':
+                return redirect(url_for('calendario_page'))
+            else:
+                return redirect(url_for('novo_evento_page'))
         else:
             return "Usuário ou senha inválidos", 401
     return render_template("login.html")
