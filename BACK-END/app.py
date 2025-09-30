@@ -185,7 +185,7 @@ def login():
             tipo_usuario = user.get('tipo_usuario', 'externo')
             session['tipo_usuario'] = tipo_usuario
 
-            if tipo_usuario == 'aluno':
+            if tipo_usuario == 'aluno' or 'externo':
                 return redirect(url_for('calendario_page'))
             else:
                 return redirect(url_for('novo_evento_page'))
